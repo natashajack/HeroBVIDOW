@@ -179,6 +179,7 @@
 
   /* expandable leaderboard rows */
   .lb-row{cursor:pointer}
+  .lb-row.locked-row{cursor:default}
   .lb-row .caret{font-size:13px;opacity:.5;transition:transform .2s}
   .lb-wrap.open .caret{transform:rotate(90deg)}
   .lb-detail{display:none;background:rgba(22,32,58,.05);border-radius:8px;
@@ -349,8 +350,8 @@ const ROSTER = [
 const PORTRAITS = {
   // --- Tank ---
   "Reinhardt": "https://img.rankedboost.com/wp-content/plugins/k-Overwatch/assets/heroes/reinhardt.png",
-  "Winston": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/46a10db3aa908c590ddc4e7606376a88143d1f1306ecfbea043263040f9529a5.png",
-  "Zarya": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/9b6f63cc66ddf9d5e0862173c733cc0d2e574c5c89357798d91b93b2f95a7080.png",
+  "Winston": "https://static.wikia.nocookie.net/overwatch_gamepedia/images/f/f8/Icon-Winston.png/revision/latest/scale-to-width-down/250?cb=20221005161721",
+  "Zarya": "https://static.wikia.nocookie.net/overwatch_gamepedia/images/7/75/Icon-Zarya.png/revision/latest/scale-to-width-down/250?cb=20221005161732",
   "D.Va": "https://static.wikitide.net/deathbattlewiki/f/f7/Portrait.dva.png",
   "Roadhog": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqYjLaIgMhu-1jf8qzu4s-U9Jn8i7oIjhbig&s",
   "Orisa": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQljHxPZrWVFGMc_hGR3YOBIAPmmJ4CBNy5Ug&s",
@@ -391,16 +392,16 @@ const PORTRAITS = {
   "Zenyatta": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQa6YAWWDtgiArFV9r1OlujIP5AHZLkGnrLAQ&s",
   "Ana": "https://img.rankedboost.com/wp-content/plugins/k-Overwatch/assets/heroes/ana.png",
   "Lúcio": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmtkYbB_fL6ZaA5ce0Z2orPYs2PBrU29DPpQ&s",
-  "Moira": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/f48f8485056d5d00dad195859188d23e50f7126b8b08b5646f46ef1b42f5e1de.png",
+  "Moira": "https://static.wikia.nocookie.net/overwatch_gamepedia/images/5/55/Icon-Moira.png/revision/latest/scale-to-width-down/250?cb=20221005160935",
   "Brigitte": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTYRddayFjCzuA2g4zuNAW_ylYSL7zS-jzB9Q&s",
-  "Baptiste": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/d4e6f1ca45d9f88fa89260787397f141a6f007b14e5b26698883b6a17bab9680.png",
+  "Baptiste": "https://static.wikia.nocookie.net/overwatch_gamepedia/images/f/fb/Icon-Baptiste.png/revision/latest/scale-to-width-down/250?cb=20221005160910",
   "Kiriko": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTpIuSPj844HLrylDm9uosaDG196UyvRbYvXQ&s",
   "Lifeweaver": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRVt-RpOdxdB1P8SLcXg8_kNHh26xAF-2wPug&s",
   "Illari": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR4Pa4YGxHEYX-JFH2tgUyL8pflwQwYxyK1Bw&s",
   "Juno": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSi-fqqo9_QXAyk9muUZ-MDBj9JiiOHKoRUNg&s",
-  "Wuyang": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/4959500b495b35c0908be2abda56b53f2601b2c5cc39a1cfde8df1bffd38d66d.png",
-  "Mizuki": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/a9733c2367e0cbd70b9316fd2e1e17028653ec56d0051ea6ff098531dc4f99fc.png",
-  "Jetpack Cat": "https://d15f34w2p8l1cc.cloudfront.net/overwatch/03a184cd0de27091e0099ac22635ad9615a8f6997881a5c25cc5f2444764f729.png"
+  "Wuyang": "https://static.wikia.nocookie.net/overwatch_gamepedia/images/6/6c/Icon-Wuyang.png/revision/latest/scale-to-width-down/250?cb=20250826195208",
+  "Mizuki": "https://static.wikia.nocookie.net/overwatch_gamepedia/images/3/36/Icon-Mizuki.png/revision/latest/scale-to-width-down/250?cb=20260210211030",
+  "Jetpack Cat": "https://static.wikia.nocookie.net/overwatch_gamepedia/images/1/12/Icon-Jetpack_Cat.png/revision/latest?cb=20260210211110"
 };
 
 function letterAvatar(h){
@@ -559,29 +560,41 @@ async function renderBoard(){
   let board=await loadBoard();
   if(!board.length){ listEl.innerHTML='<div class="lb-empty">No scores yet today — be the first!</div>'; return; }
   board.sort((a,b)=> a.turns-b.turns || a.ts-b.ts);
+  // guess history is hidden until the player has finished today's puzzle
+  const reveal = over || hasPlayedToday();
   listEl.innerHTML='';
   board.forEach((e,i)=>{
     const wrap=document.createElement('div');
     wrap.className='lb-wrap';
     const rc=i===0?'r1':i===1?'r2':i===2?'r3':'';
     const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
-    // build guess history lines
-    const gl=(e.guesses&&e.guesses.length)
-      ? e.guesses.map((gn,gi)=>{
-          const last=gi===e.guesses.length-1;
-          return `<div class="gline"><span class="gnum">${gi+1}</span>
-            <span class="gname">${escapeHtml(gn)}</span>
-            <span class="gmark ${last?'hit':'miss'}">${last?'✓':'✕'}</span></div>`;
-        }).join('')
-      : '<div class="gline" style="opacity:.6">No guess history recorded.</div>';
-    wrap.innerHTML=`
-      <div class="lb-row${e.id===myEntryId?' me':''}">
-        <div class="rank ${rc}">${medal}</div>
-        <div class="nm">${escapeHtml(e.name)}</div>
-        <div class="turns">${e.turns} ${e.turns===1?'turn':'turns'} <span class="caret">▶</span></div>
-      </div>
-      <div class="lb-detail">${gl}</div>`;
-    wrap.querySelector('.lb-row').onclick=()=>wrap.classList.toggle('open');
+    if(reveal){
+      // build guess history lines
+      const gl=(e.guesses&&e.guesses.length)
+        ? e.guesses.map((gn,gi)=>{
+            const last=gi===e.guesses.length-1;
+            return `<div class="gline"><span class="gnum">${gi+1}</span>
+              <span class="gname">${escapeHtml(gn)}</span>
+              <span class="gmark ${last?'hit':'miss'}">${last?'✓':'✕'}</span></div>`;
+          }).join('')
+        : '<div class="gline" style="opacity:.6">No guess history recorded.</div>';
+      wrap.innerHTML=`
+        <div class="lb-row${e.id===myEntryId?' me':''}">
+          <div class="rank ${rc}">${medal}</div>
+          <div class="nm">${escapeHtml(e.name)}</div>
+          <div class="turns">${e.turns} ${e.turns===1?'turn':'turns'} <span class="caret">▶</span></div>
+        </div>
+        <div class="lb-detail">${gl}</div>`;
+      wrap.querySelector('.lb-row').onclick=()=>wrap.classList.toggle('open');
+    } else {
+      // locked: show name + turns only, no caret, no expand
+      wrap.innerHTML=`
+        <div class="lb-row locked-row">
+          <div class="rank ${rc}">${medal}</div>
+          <div class="nm">${escapeHtml(e.name)}</div>
+          <div class="turns">${e.turns} ${e.turns===1?'turn':'turns'}</div>
+        </div>`;
+    }
     listEl.appendChild(wrap);
   });
 }
