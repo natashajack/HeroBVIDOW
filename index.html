@@ -13,6 +13,7 @@
     --panel-dark:rgba(20,28,46,0.82);
     --accent:#ff7a00; --accent-2:#36b6ff;
     --correct:#1f7a3d; --correct-d:#155c2c;
+    --close:#a8821f; --close-d:#86671a;
     --wrong:#8a1f24; --wrong-d:#6a161a;
     --text-dark:#16203a; --text-light:#f4f7ff;
     --radius:14px;
@@ -34,6 +35,8 @@
   }
   .wrap{max-width:860px;margin:0 auto;padding:22px 16px 60px}
 
+  button:focus-visible,input:focus-visible{outline:3px solid var(--accent-2);outline-offset:2px}
+
   /* nav */
   nav{
     background:var(--panel); color:var(--text-dark);
@@ -48,16 +51,18 @@
     letter-spacing:1px; box-shadow:0 4px 14px rgba(255,122,0,.5);
   }
   nav .links{display:flex;flex-wrap:wrap;gap:14px 26px;font-family:'Orbitron';
-    font-weight:600;font-size:15px;letter-spacing:.5px}
+    font-weight:600;font-size:15px;letter-spacing:.5px;align-items:center}
   nav .links span{cursor:pointer;transition:.15s;opacity:.85}
   nav .links span:hover{color:var(--accent);opacity:1}
   nav .links span.active{color:var(--accent)}
   nav .links span.title{font-family:'Orbitron';font-weight:800;font-size:22px;
     letter-spacing:.5px;color:var(--text-dark);cursor:default;opacity:1}
   nav .links span.title:hover{color:var(--text-dark)}
+  nav .puzzlenum{margin-left:auto;font-family:'Orbitron';font-weight:600;font-size:13px;
+    opacity:.55;letter-spacing:1px}
 
   /* mode buttons */
-  .modes{display:flex;gap:18px;justify-content:center;margin:26px 0}
+  .modes{display:flex;gap:18px;justify-content:center;margin:26px 0;flex-wrap:wrap}
   .mode-btn{
     background:var(--panel);color:var(--text-dark);
     border:none;border-radius:var(--radius);padding:16px 40px;
@@ -75,10 +80,14 @@
     overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.45);
   }
   .mystery .face{background:#cfe0ff;height:170px;display:grid;place-items:center}
-  .mystery .face .q{font-size:120px;color:#2b3450;font-family:'Orbitron';font-weight:800;line-height:1}
+  .mystery .face .q{font-size:120px;color:#2b3450;font-family:'Orbitron';font-weight:800;line-height:1;
+    animation:pulse 2.6s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
   .mystery .face img{width:100%;height:100%;object-fit:cover}
   .mystery .label{color:var(--text-dark);text-align:center;font-weight:700;
     font-size:22px;padding:14px;font-family:'Orbitron'}
+  .countdown{text-align:center;margin:12px 0 0;font-family:'Orbitron';font-weight:600;
+    font-size:13px;letter-spacing:1.5px;opacity:.7}
 
   /* guess input */
   .guessbox{position:relative;margin:22px auto 0;max-width:680px}
@@ -122,7 +131,7 @@
     width:120px;cursor:pointer;overflow:hidden;transition:.12s;
     box-shadow:0 4px 12px rgba(0,0,0,.3);
   }
-  .ac .opt:hover{border-color:var(--accent);transform:translateY(-3px)}
+  .ac .opt:hover,.ac .opt.kb{border-color:var(--accent);transform:translateY(-3px)}
   .ac .opt .pf{height:96px;width:100%;object-fit:cover;display:block}
   .ac .opt .nm{color:var(--text-dark);font-weight:700;text-align:center;padding:8px 4px;font-size:15px}
 
@@ -130,13 +139,16 @@
     text-shadow:0 2px 8px rgba(0,0,0,.6)}
 
   /* rules legend */
-  .rules{display:flex;align-items:center;gap:12px;justify-content:center;margin:26px 0 14px;
-    font-family:'Orbitron';font-weight:600;font-size:18px}
+  .rules{display:flex;align-items:center;gap:12px;justify-content:center;margin:26px 0 6px;
+    font-family:'Orbitron';font-weight:600;font-size:18px;flex-wrap:wrap}
   .pill{padding:6px 18px;border-radius:8px;font-size:16px}
-  .pill.c{background:var(--correct)}.pill.w{background:var(--wrong)}
+  .pill.c{background:var(--correct)}.pill.w{background:var(--wrong)}.pill.cl{background:var(--close)}
+  .rules-note{text-align:center;font-size:14px;opacity:.65;margin-bottom:14px;line-height:1.6}
+  .gcount{margin-left:6px;font-size:15px;opacity:.8}
 
   /* guess table */
-  .gtable{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:8px}
+  .gscroll{overflow-x:auto;padding-bottom:6px}
+  .gtable{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:8px;min-width:560px}
   .ghead,.grow{display:grid;grid-template-columns:1.3fr repeat(6,1fr);gap:6px}
   .ghead{background:var(--panel-dark);border-radius:10px;padding:4px}
   .ghead div{text-align:center;font-weight:700;font-family:'Orbitron';font-size:14px;
@@ -149,6 +161,7 @@
   .grow .cell.name{background:#fff;color:var(--text-dark);font-family:'Orbitron';font-size:14px}
   .grow .cell.name img{width:54px;height:54px;border-radius:6px;object-fit:cover}
   .cell.correct{background:var(--correct)}
+  .cell.close{background:var(--close)}
   .cell.wrong{background:var(--wrong)}
   .cell .ar{font-size:13px;opacity:.9}
   @keyframes flip{from{transform:rotateX(90deg);opacity:0}to{transform:rotateX(0);opacity:1}}
@@ -166,8 +179,18 @@
   }
   .win h2{font-family:'Orbitron';color:var(--correct);font-size:26px;margin-bottom:6px}
   .win p{font-size:18px;margin-bottom:14px}
+  .win .stats{display:flex;gap:26px;justify-content:center;margin:4px 0 16px;
+    font-family:'Orbitron';font-size:12px;letter-spacing:.5px;text-transform:uppercase;opacity:.85}
+  .win .stats b{display:block;font-size:24px;letter-spacing:0}
   .win button{background:var(--accent);color:#fff;border:none;padding:12px 28px;
-    border-radius:10px;font-family:'Orbitron';font-weight:600;font-size:16px;cursor:pointer}
+    border-radius:10px;font-family:'Orbitron';font-weight:600;font-size:16px;cursor:pointer;transition:.15s}
+  .win button:hover{filter:brightness(1.08)}
+  .win .share-btn{background:var(--accent-2)}
+
+  /* confetti */
+  .confetti{position:fixed;top:-16px;width:10px;height:14px;z-index:999;pointer-events:none;
+    border-radius:2px;animation:fall linear forwards}
+  @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
 
   /* leaderboard */
   .lb-entry{margin-top:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
@@ -251,6 +274,26 @@
   .lb-detail .gmark.hit{color:var(--correct)}
   .lb-detail .gmark.miss{color:var(--wrong)}
   .footer{text-align:center;margin-top:40px;opacity:.6;font-size:14px;font-family:'Orbitron'}
+
+  /* mobile */
+  @media(max-width:640px){
+    nav{gap:14px;padding:14px 18px}
+    nav .links span.title{font-size:17px}
+    nav .puzzlenum{display:none}
+    .modes{gap:10px}
+    .mode-btn{padding:12px 18px;font-size:15px}
+    .ghead div{font-size:11px;padding:8px 2px}
+    .grow .cell{font-size:13px;min-height:64px;padding:8px 2px;gap:2px}
+    .grow .cell.name{font-size:11px}
+    .grow .cell.name img{width:40px;height:40px}
+    .hint{font-size:17px}
+    .rules{font-size:15px}
+    .pill{padding:5px 12px;font-size:14px}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{animation:none!important;transition:none!important}
+  }
 </style>
 </head>
 <body>
@@ -260,6 +303,7 @@
     <div class="links">
       <span class="title">BVID OW Hero of the Day</span>
     </div>
+    <div class="puzzlenum" id="puzzleNum"></div>
   </nav>
 
   <div class="modes">
@@ -283,11 +327,12 @@
     <div class="face"><div class="q" id="mysteryFace">?</div></div>
     <div class="label" id="mysteryLabel">???</div>
   </div>
+  <div class="countdown" id="countdown"></div>
 
   <div class="playarea locked" id="playArea">
   <div class="guessbox">
-    <input type="text" id="guessInput" placeholder="Guess..." autocomplete="off" disabled>
-    <button class="dropdown-toggle" id="dropdownToggle" title="Show all heroes" disabled>▾</button>
+    <input type="text" id="guessInput" placeholder="Guess..." autocomplete="off" disabled aria-label="Guess a hero">
+    <button class="dropdown-toggle" id="dropdownToggle" title="Show all heroes" disabled aria-label="Show all heroes">▾</button>
     <div class="ac" id="autocomplete"></div>
     <div class="all-panel" id="allPanel"></div>
   </div>
@@ -295,13 +340,16 @@
   <div class="hint" id="hint">Take your first guess to get a clue.<br>Or tap the ▾ to browse all heroes.</div>
 
   <div id="rulesArea" style="display:none">
-    <div class="rules">Rules: <span class="pill c">Correct</span><span class="pill w">Incorrect</span></div>
+    <div class="rules">Rules: <span class="pill c">Correct</span><span class="pill cl">Close</span><span class="pill w">Incorrect</span><span class="gcount" id="gCount"></span></div>
+    <div class="rules-note">▲ the hero's value is higher · ▼ it's lower · Yellow = within 5 years (Age) or 2 years (Release)</div>
+    <div class="gscroll">
     <div class="gtable">
       <div class="ghead">
         <div>Hero</div><div>Gender</div><div>Role</div><div>Continent</div>
         <div>Species</div><div>Age</div><div>Release</div>
       </div>
       <div id="guessRows"></div>
+    </div>
     </div>
   </div>
   </div>
@@ -349,7 +397,7 @@
     </div>
   </div>
 
-  <div class="footer">BVID OW · v1.1</div>
+  <div class="footer">BVID OW · v1.2</div>
 </div>
 
 <script type="module">
@@ -525,7 +573,7 @@ function avatar(h){
 // if a portrait URL fails to load, swap in the letter-avatar
 function imgFallback(h){ return `this.onerror=null;this.src='${letterAvatar(h)}'`; }
 
-let target=null, guesses=[], over=false, mode='daily', playerName='';
+let target=null, guesses=[], over=false, playerName='';
 
 // Get Y/M/D in America/Los_Angeles (auto-handles PST/PDT)
 function ptParts(){
@@ -538,6 +586,10 @@ function ptParts(){
 function ptDayNumber(){
   const {y,m,d}=ptParts();
   return Math.floor(Date.UTC(y,m-1,d)/86400000);
+}
+// puzzle number shown to players & used in the share text (1 = Jan 1 2026)
+function puzzleNumber(){
+  return ptDayNumber() - Math.floor(Date.UTC(2026,0,1)/86400000) + 1;
 }
 // deterministic shuffle so the daily order looks random but is identical for everyone.
 // Re-shuffles each full cycle so it doesn't repeat the same sequence forever.
@@ -558,10 +610,13 @@ function pickTarget(){
   return ROSTER[dailyHeroIndex()];
 }
 
+// "close but not exact" thresholds for the numeric columns
+const CLOSE={age:5, release:2};
 function cmp(g,t,key){
   if(key==='age'||key==='release'){
     if(g[key]===t[key]) return {cls:'correct',ar:''};
-    return {cls:'wrong',ar: g[key]<t[key]?'▲':'▼'};
+    const ar = g[key]<t[key]?'▲':'▼';
+    return {cls: Math.abs(g[key]-t[key])<=CLOSE[key] ? 'close' : 'wrong', ar};
   }
   return g[key]===t[key]?{cls:'correct',ar:''}:{cls:'wrong',ar:''};
 }
@@ -574,8 +629,12 @@ const ac=document.getElementById('autocomplete');
 
 function render(){
   rowsEl.innerHTML='';
-  if(guesses.length) rulesArea.style.display='block';
-  guesses.forEach(name=>{
+  if(guesses.length){
+    rulesArea.style.display='block';
+    document.getElementById('gCount').textContent=`· ${guesses.length} ${guesses.length===1?'guess':'guesses'}`;
+  }
+  // newest guess on top so you never scroll to see your latest clue
+  [...guesses].reverse().forEach(name=>{
     const g=ROSTER.find(h=>h.name===name);
     const row=document.createElement('div'); row.className='grow';
     const fields=['gender','role','continent','species','age','release'];
@@ -593,8 +652,8 @@ function makeGuess(name){
   const g=ROSTER.find(h=>h.name.toLowerCase()===name.toLowerCase());
   if(!g){hintEl.textContent='No hero by that name. Tap the ▾ to browse all heroes.';return;}
   if(guesses.includes(g.name)) return;
-  guesses.push(g.name); input.value=''; ac.innerHTML='';
-  hintEl.style.display='none'; render();
+  guesses.push(g.name); input.value=''; ac.innerHTML=''; acIdx=-1;
+  hintEl.style.display='none'; render(); saveProgress();
   if(g.name===target.name) win();
 }
 
@@ -604,15 +663,116 @@ function dayKey(){
 }
 let myEntryId=null;
 
+// ---- mid-game persistence (survive accidental refresh / tab close) ----
+function progressKey(){ return 'bvid_progress_'+dayKey(); }
+function saveProgress(){
+  try{ localStorage.setItem(progressKey(), JSON.stringify({name:playerName, guesses})); }catch(e){}
+}
+function clearProgress(){ try{ localStorage.removeItem(progressKey()); }catch(e){} }
+function restoreProgress(){
+  let p=null;
+  try{ p=JSON.parse(localStorage.getItem(progressKey())||'null'); }catch(e){}
+  if(!p || !p.name) return false;
+  playerName=p.name;
+  guesses=Array.isArray(p.guesses)?p.guesses.filter(n=>ROSTER.some(h=>h.name===n)):[];
+  nameGate.style.display='none';
+  playArea.classList.remove('locked');
+  input.disabled=false; dropdownToggle.disabled=false;
+  if(guesses.length){ hintEl.style.display='none'; render(); }
+  return true;
+}
+
+// ---- local stats / streak (per device) ----
+function loadStats(){ try{ return JSON.parse(localStorage.getItem('bvid_stats')||'{}'); }catch(e){ return {}; } }
+function updateStats(){
+  const s=loadStats(), day=ptDayNumber();
+  if(s.lastDay===day) return s;                       // already counted today
+  s.streak=(s.lastDay===day-1)?(s.streak||0)+1:1;     // consecutive PT days
+  s.best=Math.max(s.best||0,s.streak);
+  s.played=(s.played||0)+1;
+  s.lastDay=day;
+  try{ localStorage.setItem('bvid_stats',JSON.stringify(s)); }catch(e){}
+  return s;
+}
+
+// ---- Wordle-style shareable result ----
+const EMOJI={correct:'🟩',close:'🟨',wrong:'🟥'};
+function shareText(){
+  const fields=['gender','role','continent','species','age','release'];
+  const grid=guesses.map(name=>{
+    const g=ROSTER.find(h=>h.name===name);
+    return fields.map(f=>EMOJI[cmp(g,target,f).cls]).join('');
+  }).join('\n');
+  return `BVID OW Hero of the Day #${puzzleNumber()}\nSolved in ${guesses.length} ${guesses.length===1?'guess':'guesses'}\n\n${grid}`;
+}
+async function copyShare(btn){
+  const text=shareText();
+  let ok=false;
+  try{ await navigator.clipboard.writeText(text); ok=true; }
+  catch(e){
+    // fallback for non-secure contexts
+    const ta=document.createElement('textarea');
+    ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    try{ ok=document.execCommand('copy'); }catch(e2){}
+    ta.remove();
+  }
+  if(btn){ btn.textContent= ok ? '✅ Copied!' : '⚠️ Copy failed';
+    setTimeout(()=>btn.textContent='📋 Copy result',2000); }
+}
+
+// ---- countdown to the next hero (midnight PT) ----
+function secsToMidnightPT(){
+  const fmt=new Intl.DateTimeFormat('en-GB',{timeZone:'America/Los_Angeles',
+    hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+  const p={}; fmt.formatToParts(new Date()).forEach(x=>{if(x.type!=='literal')p[x.type]=x.value;});
+  return 86400 - ((+p.hour)*3600 + (+p.minute)*60 + (+p.second));
+}
+function tickCountdown(){
+  const el=document.getElementById('countdown'); if(!el) return;
+  let s=secsToMidnightPT(); if(s>=86400) s=0;
+  const h=String(Math.floor(s/3600)).padStart(2,'0');
+  const m=String(Math.floor((s%3600)/60)).padStart(2,'0');
+  const sec=String(s%60).padStart(2,'0');
+  el.textContent=`NEXT HERO IN ${h}:${m}:${sec}`;
+}
+setInterval(tickCountdown,1000); tickCountdown();
+
+// ---- confetti on win ----
+function confetti(){
+  if(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const colors=['#ff7a00','#36b6ff','#7CFC9B','#e8c34a','#e06aa0','#ffffff'];
+  for(let i=0;i<90;i++){
+    const d=document.createElement('div'); d.className='confetti';
+    d.style.left=Math.random()*100+'vw';
+    d.style.background=colors[i%colors.length];
+    d.style.animationDuration=(2.2+Math.random()*1.8)+'s';
+    d.style.animationDelay=(Math.random()*0.6)+'s';
+    document.body.appendChild(d);
+    setTimeout(()=>d.remove(),4800);
+  }
+}
+
 function win(){
   over=true; input.disabled=true; ac.innerHTML=''; dropdownToggle.disabled=true; closeAllPanel();
+  clearProgress();
   document.getElementById('mysteryFace').outerHTML=`<img src="${avatar(target)}" onerror="${imgFallback(target)}">`;
   document.getElementById('mysteryLabel').textContent=target.name;
+  const s=updateStats();
   const w=document.createElement('div'); w.className='win';
   w.innerHTML=`<h2>Solved!</h2>
     <p><b>${escapeHtml(playerName)}</b> got <b>${target.name}</b> in <b>${guesses.length}</b> ${guesses.length===1?'guess':'guesses'}.</p>
+    <div class="stats">
+      <div><b>${s.streak}</b>🔥 streak</div>
+      <div><b>${s.best}</b>best streak</div>
+      <div><b>${s.played}</b>played</div>
+    </div>
+    <button class="share-btn" id="shareBtn">📋 Copy result</button>
     <p class="lb-note" id="submitStatus">Submitting your score…</p>`;
   rulesArea.parentNode.insertBefore(w,rulesArea.nextSibling);
+  document.getElementById('shareBtn').onclick=e=>copyShare(e.currentTarget);
+  w.scrollIntoView({behavior:'smooth',block:'center'});
+  confetti();
   submitScore();
 }
 
@@ -700,22 +860,29 @@ async function renderBoard(){
 
 function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
+// ---- autocomplete (with keyboard navigation) ----
+let acIdx=-1;
 input.addEventListener('input',()=>{
   const v=input.value.trim().toLowerCase();
-  ac.innerHTML='';
-  if(v==='all'){ showOpts(ROSTER); return; }
+  ac.innerHTML=''; acIdx=-1;
+  if(v==='all'){ showOpts(ROSTER.filter(h=>!guesses.includes(h.name))); return; }
   if(!v) return;
-  const matches=ROSTER.filter(h=>h.name.toLowerCase().startsWith(v) && !guesses.includes(h.name)).slice(0,5);
-  showOpts(matches);
+  const pool=ROSTER.filter(h=>!guesses.includes(h.name));
+  const starts=pool.filter(h=>h.name.toLowerCase().startsWith(v));
+  const contains=pool.filter(h=>!starts.includes(h) && h.name.toLowerCase().includes(v));
+  showOpts([...starts,...contains].slice(0,5));
 });
 function showOpts(list){
-  ac.innerHTML='';
+  ac.innerHTML=''; acIdx=-1;
   list.forEach(h=>{
     const o=document.createElement('div');o.className='opt';
     o.innerHTML=`<img class="pf" src="${avatar(h)}" onerror="${imgFallback(h)}"><div class="nm">${h.name}</div>`;
     o.onclick=()=>makeGuess(h.name);
     ac.appendChild(o);
   });
+}
+function highlightAc(){
+  [...ac.children].forEach((o,i)=>o.classList.toggle('kb',i===acIdx));
 }
 
 // ---- "browse all heroes" dropdown ----
@@ -751,10 +918,19 @@ document.addEventListener('click',(e)=>{
   if(!e.target.closest('.guessbox')) closeAllPanel();
 });
 input.addEventListener('keydown',e=>{
+  const opts=[...ac.children];
+  if(e.key==='ArrowDown' && opts.length){ e.preventDefault(); acIdx=(acIdx+1)%opts.length; highlightAc(); return; }
+  if(e.key==='ArrowUp' && opts.length){ e.preventDefault(); acIdx=(acIdx-1+opts.length)%opts.length; highlightAc(); return; }
+  if(e.key==='Escape'){ ac.innerHTML=''; acIdx=-1; closeAllPanel(); return; }
   if(e.key==='Enter'){
+    // exact name match always wins, then the keyboard-highlighted option, then the first suggestion
+    const typed=input.value.trim();
+    const exact=ROSTER.find(h=>h.name.toLowerCase()===typed.toLowerCase());
+    if(exact){ makeGuess(exact.name); return; }
+    if(acIdx>=0 && opts[acIdx]){ makeGuess(opts[acIdx].querySelector('.nm').textContent); return; }
     const first=ac.querySelector('.opt .nm');
     if(first) makeGuess(first.textContent);
-    else makeGuess(input.value.trim());
+    else if(typed) makeGuess(typed);
   }
 });
 
@@ -775,6 +951,7 @@ function startGame(){
   playArea.classList.remove('locked');
   input.disabled=false;
   dropdownToggle.disabled=false;
+  saveProgress();
   input.focus();
 }
 startBtn.onclick=startGame;
@@ -969,7 +1146,9 @@ modeSortBtn.onclick=()=>{
 };
 
 target=pickTarget();
+document.getElementById('puzzleNum').textContent=`PUZZLE #${puzzleNumber()}`;
 if(hasPlayedToday()){ showAlreadyPlayed(); }
+else{ restoreProgress(); }   // resume an in-progress game after a refresh
 renderBoard();
 </script>
 </body>
