@@ -406,6 +406,7 @@
         <button class="sort-submit" id="sortSubmit">Submit Answers</button>
       </div>
       <div class="sort-result" id="sortResult"></div>
+      <p class="lb-note" id="sortStatus" style="text-align:center"></p>
     </div>
 
     <div class="leaderboard" id="sortLeaderboard">
@@ -1107,10 +1108,19 @@ async function submitSortScore(correct){
   sortEntryId='sid_'+Math.random().toString(36).slice(2,9);
   const entry={ id:sortEntryId, name:sortName.slice(0,20), score:correct, total:sortDeal.length,
     ts:Date.now(), day:dayKey(), picks:sortDeal.map(n=>({name:n,side:placedSide(n)})) };
+  const status=document.getElementById('sortStatus');
+  if(status) status.textContent='Saving your score…';
   try{
-    if(!db) throw new Error('no backend');
+    if(!db) throw new Error('Leaderboard backend not configured.');
     await addDoc(collection(db,'sortScores'), entry);
-  }catch(err){ console.error(err); }
+    if(status) status.textContent='Score saved!';
+  }catch(err){
+    console.error('Faction score save failed:',err);
+    if(status){
+      status.textContent='Could not save score: '+(err && err.message ? err.message : err);
+      status.style.color='#ffb3b3';
+    }
+  }
 }
 function placedSide(name){
   if(document.querySelector(`#zone-ow .htoken[data-name="${CSS.escape(name)}"]`)) return 'Overwatch';
