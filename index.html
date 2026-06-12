@@ -84,6 +84,11 @@
     animation:pulse 2.6s ease-in-out infinite}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
   .mystery .face img{width:100%;height:100%;object-fit:cover}
+  .mystery.solved{animation:glowpulse 1.4s ease-in-out 3}
+  .mystery.solved .face img{animation:revealin .65s cubic-bezier(.2,.9,.3,1.2) both}
+  .mystery.solved .label{color:var(--correct)}
+  @keyframes revealin{from{transform:scale(.35) rotate(-10deg);opacity:0}
+    to{transform:scale(1) rotate(0);opacity:1}}
   .mystery .label{color:var(--text-dark);text-align:center;font-weight:700;
     font-size:22px;padding:14px;font-family:'Orbitron'}
   .countdown{text-align:center;margin:12px 0 0;font-family:'Orbitron';font-weight:600;
@@ -111,7 +116,7 @@
     display:none;position:absolute;left:0;right:0;top:calc(100% + 8px);z-index:40;
     background:#fff;border-radius:12px;box-shadow:0 12px 36px rgba(0,0,0,.45);
     max-height:340px;overflow-y:auto;padding:12px;
-    grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;
+    grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:10px;
   }
   .all-panel.open{display:grid}
   .all-panel .opt{
@@ -120,20 +125,20 @@
   }
   .all-panel .opt:hover{border-color:var(--accent);transform:translateY(-3px)}
   .all-panel .opt.guessed{opacity:.35;pointer-events:none;filter:grayscale(.7)}
-  .all-panel .opt .pf{height:80px;width:100%;object-fit:cover;display:block}
-  .all-panel .opt .nm{color:var(--text-dark);font-weight:700;text-align:center;padding:6px 4px;font-size:14px}
+  .all-panel .opt .pf{height:100px;width:100%;object-fit:cover;display:block}
+  .all-panel .opt .nm{color:var(--text-dark);font-weight:700;text-align:center;padding:6px 4px;font-size:15px}
   .ac{
     position:absolute;left:0;right:0;top:calc(100% + 8px);z-index:30;
     display:flex;gap:10px;flex-wrap:wrap;justify-content:center;
   }
   .ac .opt{
     background:#fff;border:2px solid #e1e6f0;border-radius:8px;
-    width:120px;cursor:pointer;overflow:hidden;transition:.12s;
+    width:140px;cursor:pointer;overflow:hidden;transition:.12s;
     box-shadow:0 4px 12px rgba(0,0,0,.3);
   }
   .ac .opt:hover,.ac .opt.kb{border-color:var(--accent);transform:translateY(-3px)}
-  .ac .opt .pf{height:96px;width:100%;object-fit:cover;display:block}
-  .ac .opt .nm{color:var(--text-dark);font-weight:700;text-align:center;padding:8px 4px;font-size:15px}
+  .ac .opt .pf{height:116px;width:100%;object-fit:cover;display:block}
+  .ac .opt .nm{color:var(--text-dark);font-weight:700;text-align:center;padding:8px 4px;font-size:16px}
 
   .hint{text-align:center;margin:20px 0;font-size:20px;font-weight:600;line-height:1.5;
     text-shadow:0 2px 8px rgba(0,0,0,.6)}
@@ -159,7 +164,7 @@
     animation:flip .5s ease both;
   }
   .grow .cell.name{background:#fff;color:var(--text-dark);font-family:'Orbitron';font-size:14px}
-  .grow .cell.name img{width:54px;height:54px;border-radius:6px;object-fit:cover}
+  .grow .cell.name img{width:66px;height:66px;border-radius:8px;object-fit:cover}
   .cell.correct{background:var(--correct)}
   .cell.close{background:var(--close)}
   .cell.wrong{background:var(--wrong)}
@@ -237,28 +242,39 @@
   .sort-col{background:var(--panel);border-radius:var(--radius);padding:14px;
     box-shadow:0 8px 26px rgba(0,0,0,.35)}
   .sort-col h4{text-align:center;font-family:'Orbitron';color:var(--text-dark);
-    font-size:18px;margin-bottom:12px}
+    font-size:21px;margin-bottom:12px}
+  .sort-col h4 .col-ic{font-size:26px;vertical-align:-3px;margin-right:6px}
   .dropzone{min-height:240px;border:2px dashed rgba(22,32,58,.25);border-radius:10px;
     padding:10px;display:flex;flex-direction:column;gap:10px;transition:.15s}
   .dropzone.dragover{border-color:var(--accent);background:rgba(255,122,0,.08)}
-  .htoken{display:flex;align-items:center;gap:10px;background:#fff;border:2px solid #e1e6f0;
-    border-radius:10px;padding:8px 12px;cursor:grab;user-select:none;color:var(--text-dark);
-    font-weight:700;box-shadow:0 3px 10px rgba(0,0,0,.2);transition:.12s}
+  .htoken{display:flex;align-items:center;gap:12px;background:#fff;border:2px solid #e1e6f0;
+    border-radius:12px;padding:10px 14px;cursor:grab;user-select:none;color:var(--text-dark);
+    font-weight:700;font-size:18px;box-shadow:0 3px 10px rgba(0,0,0,.2);transition:.12s}
   .htoken:active{cursor:grabbing}
   .htoken.dragging{opacity:.4}
-  .htoken img{width:40px;height:40px;border-radius:6px;object-fit:cover}
-  .htoken.correct{border-color:var(--correct);background:rgba(31,122,61,.12)}
-  .htoken.wrong{border-color:var(--wrong);background:rgba(138,31,36,.12)}
-  .htoken .verdict{margin-left:auto;font-weight:800}
+  .htoken img{width:64px;height:64px;border-radius:8px;object-fit:cover}
+  .htoken.correct{border-color:var(--correct);background:rgba(31,122,61,.12);
+    animation:popin .5s ease both}
+  .htoken.wrong{border-color:var(--wrong);background:rgba(138,31,36,.12);
+    animation:shake .45s ease both}
+  @keyframes popin{0%{transform:scale(1)}45%{transform:scale(1.1)}100%{transform:scale(1)}}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}
+    50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
+  .htoken .verdict{margin-left:auto;font-weight:800;font-size:22px}
   .htoken.correct .verdict{color:var(--correct)}
   .htoken.wrong .verdict{color:var(--wrong)}
+  .sort-col.celebrate{animation:glowpulse 1.4s ease-in-out 3}
   .sort-submit{background:var(--accent);color:#fff;border:none;padding:14px 40px;
     border-radius:12px;font-family:'Orbitron';font-weight:600;font-size:17px;cursor:pointer;
     box-shadow:0 8px 26px rgba(0,0,0,.4);transition:.15s}
   .sort-submit:hover{filter:brightness(1.08)}
   .sort-submit:disabled{opacity:.5;cursor:not-allowed}
-  .sort-result{text-align:center;margin:18px auto;max-width:520px;font-size:20px;
+  .sort-result{text-align:center;margin:18px auto;max-width:520px;font-size:24px;
     font-weight:700;font-family:'Orbitron';text-shadow:0 2px 8px rgba(0,0,0,.6)}
+  .sort-result.show{animation:resultpop .55s cubic-bezier(.2,.9,.3,1.25) both}
+  @keyframes resultpop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+  @keyframes glowpulse{0%,100%{box-shadow:0 8px 26px rgba(0,0,0,.35)}
+    50%{box-shadow:0 0 34px 8px rgba(255,200,60,.6)}}
   @media(max-width:560px){.sort-cols{grid-template-columns:1fr}}
   .lb-row .caret{font-size:13px;opacity:.5;transition:transform .2s}
   .lb-wrap.open .caret{transform:rotate(90deg)}
@@ -285,7 +301,9 @@
     .ghead div{font-size:11px;padding:8px 2px}
     .grow .cell{font-size:13px;min-height:64px;padding:8px 2px;gap:2px}
     .grow .cell.name{font-size:11px}
-    .grow .cell.name img{width:40px;height:40px}
+    .grow .cell.name img{width:46px;height:46px}
+    .htoken{font-size:16px;gap:10px;padding:8px 12px}
+    .htoken img{width:52px;height:52px}
     .hint{font-size:17px}
     .rules{font-size:15px}
     .pill{padding:5px 12px;font-size:14px}
@@ -376,11 +394,11 @@
       <div class="sort-pool" id="sortPool"></div>
       <div class="sort-cols">
         <div class="sort-col" data-side="Overwatch">
-          <h4>🛡️ Overwatch</h4>
+          <h4><span class="col-ic">🛡️</span>Overwatch</h4>
           <div class="dropzone" id="zone-ow"></div>
         </div>
         <div class="sort-col" data-side="Talon">
-          <h4>🦂 Talon</h4>
+          <h4><span class="col-ic">🦂</span>Talon</h4>
           <div class="dropzone" id="zone-talon"></div>
         </div>
       </div>
@@ -758,6 +776,7 @@ function win(){
   clearProgress();
   document.getElementById('mysteryFace').outerHTML=`<img src="${avatar(target)}" onerror="${imgFallback(target)}">`;
   document.getElementById('mysteryLabel').textContent=target.name;
+  document.querySelector('.mystery').classList.add('solved');
   const s=updateStats();
   const w=document.createElement('div'); w.className='win';
   w.innerHTML=`<h2>Solved!</h2>
@@ -1055,11 +1074,12 @@ async function submitSort(){
   }
   sortOver=true;
   document.getElementById('sortSubmit').disabled=true;
-  let correct=0;
+  let correct=0, delay=0;
   ['zone-ow','zone-talon'].forEach(zid=>{
     const side = zid==='zone-ow' ? 'Overwatch' : 'Talon';
     document.querySelectorAll('#'+zid+' .htoken').forEach(tok=>{
       const right = factionOf(tok.dataset.name)===side;
+      tok.style.animationDelay=(delay+=0.12)+'s';   // reveal verdicts one by one
       tok.classList.add(right?'correct':'wrong');
       tok.querySelector('.verdict').textContent = right?'✓':'✕';
       tok.draggable=false;
@@ -1067,8 +1087,16 @@ async function submitSort(){
     });
   });
   const res=document.getElementById('sortResult');
-  res.textContent=`${sortName}: ${correct} / ${sortDeal.length} correct!`;
-  res.style.color = correct===sortDeal.length ? '#7CFC9B' : '#ffd28a';
+  const perfect = correct===sortDeal.length;
+  res.textContent = perfect
+    ? `🎉 ${sortName}: ${correct} / ${sortDeal.length} — PERFECT!`
+    : `${sortName}: ${correct} / ${sortDeal.length} correct!`;
+  res.style.color = perfect ? '#7CFC9B' : '#ffd28a';
+  res.classList.add('show');
+  if(perfect){
+    confetti();
+    document.querySelectorAll('.sort-col').forEach(c=>c.classList.add('celebrate'));
+  }
   markSorted(correct);
   await submitSortScore(correct);
   renderSortBoard();
