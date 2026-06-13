@@ -272,6 +272,10 @@
   .sort-result{text-align:center;margin:18px auto;max-width:520px;font-size:24px;
     font-weight:700;font-family:'Orbitron';text-shadow:0 2px 8px rgba(0,0,0,.6)}
   .sort-result.show{animation:resultpop .55s cubic-bezier(.2,.9,.3,1.25) both}
+  .sort-share{display:block;margin:4px auto 0;background:var(--accent-2);color:#fff;border:none;
+    padding:12px 28px;border-radius:10px;font-family:'Orbitron';font-weight:600;font-size:15px;
+    cursor:pointer;transition:.15s}
+  .sort-share:hover{filter:brightness(1.08)}
   @keyframes resultpop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
   @keyframes glowpulse{0%,100%{box-shadow:0 8px 26px rgba(0,0,0,.35)}
     50%{box-shadow:0 0 34px 8px rgba(255,200,60,.6)}}
@@ -325,8 +329,8 @@
   </nav>
 
   <div class="modes">
-    <button class="mode-btn active" id="modeDailyBtn"><span class="ic">📜</span>Hero of the Day</button>
-    <button class="mode-btn" id="modeSortBtn"><span class="ic">🦂</span>Faction Guess!</button>
+    <button class="mode-btn active" id="modeDailyBtn"><span class="ic">🎯</span>Hero of the Day</button>
+    <button class="mode-btn" id="modeSortBtn"><span class="ic">⚔️</span>Faction Guess!</button>
   </div>
 
   <div id="view-daily">
@@ -383,7 +387,7 @@
     <div class="namegate" id="sortGate">
       <div class="ng-card">
         <h2>Faction Sort</h2>
-        <p>Drag each of the 5 heroes into Talon or Overwatch, then submit. Enter your name to play.</p>
+        <p>Sort each of the 5 heroes into Overwatch or Talon — drag them, or just tap a hero to move it between columns. Enter your name to play.</p>
         <input type="text" id="sortName" placeholder="Your name" maxlength="20" autocomplete="off">
         <button id="sortStartBtn">Start Faction Sort</button>
         <div class="ng-err" id="sortErr"></div>
@@ -398,7 +402,7 @@
           <div class="dropzone" id="zone-ow"></div>
         </div>
         <div class="sort-col" data-side="Talon">
-          <h4><span class="col-ic">🦂</span>Talon</h4>
+          <h4><span class="col-ic">🦅</span>Talon</h4>
           <div class="dropzone" id="zone-talon"></div>
         </div>
       </div>
@@ -724,8 +728,7 @@ function shareText(){
   }).join('\n');
   return `BVID OW Hero of the Day #${puzzleNumber()}\nSolved in ${guesses.length} ${guesses.length===1?'guess':'guesses'}\n\n${grid}`;
 }
-async function copyShare(btn){
-  const text=shareText();
+async function copyTextToClipboard(text,btn,idleLabel){
   let ok=false;
   try{ await navigator.clipboard.writeText(text); ok=true; }
   catch(e){
@@ -737,7 +740,10 @@ async function copyShare(btn){
     ta.remove();
   }
   if(btn){ btn.textContent= ok ? '✅ Copied!' : '⚠️ Copy failed';
-    setTimeout(()=>btn.textContent='📋 Copy result',2000); }
+    setTimeout(()=>btn.textContent=idleLabel||'📋 Copy result',2000); }
+}
+async function copyShare(btn){
+  await copyTextToClipboard(shareText(),btn);
 }
 
 // ---- countdown to the next hero (midnight PT) ----
@@ -1030,7 +1036,26 @@ function makeToken(name){
   t.innerHTML=`<img src="${avatar(h)}" onerror="${imgFallback(h)}"><span>${name}</span><span class="verdict"></span>`;
   t.addEventListener('dragstart',e=>{ t.classList.add('dragging'); e.dataTransfer.setData('text/plain',name); });
   t.addEventListener('dragend',()=>t.classList.remove('dragging'));
+  // tap-to-move (touchscreens can't use HTML5 drag): pool -> Overwatch -> Talon -> pool
+  t.addEventListener('click',()=>{
+    if(sortOver) return;
+    const next = t.parentElement.id==='sortPool' ? 'zone-ow'
+               : t.parentElement.id==='zone-ow'  ? 'zone-talon'
+               : 'sortPool';
+    document.getElementById(next).appendChild(t);
+    updateSortCount();
+  });
   return t;
+}
+
+// keep the submit button honest: show progress, only enable when all 5 are placed
+function updateSortCount(){
+  const btn=document.getElementById('sortSubmit');
+  if(sortOver) return;
+  const placed=document.querySelectorAll('#zone-ow .htoken, #zone-talon .htoken').length;
+  const total=sortDeal.length||5;
+  btn.disabled = placed<total;
+  btn.textContent = placed<total ? `Place heroes (${placed}/${total})` : 'Submit Answers';
 }
 
 function buildSortBoard(){
@@ -1038,8 +1063,8 @@ function buildSortBoard(){
   const pool=document.getElementById('sortPool');
   pool.innerHTML=''; document.getElementById('zone-ow').innerHTML=''; document.getElementById('zone-talon').innerHTML='';
   document.getElementById('sortResult').textContent='';
-  document.getElementById('sortSubmit').disabled=false;
   sortDeal.forEach(n=>pool.appendChild(makeToken(n)));
+  updateSortCount();
 }
 
 // drop zones (pool also accepts, so you can move heroes back)
@@ -1050,7 +1075,7 @@ function wireZone(el){
     e.preventDefault(); el.classList.remove('dragover');
     const name=e.dataTransfer.getData('text/plain');
     const tok=document.querySelector(`.htoken[data-name="${CSS.escape(name)}"]`);
-    if(tok) el.appendChild(tok);
+    if(tok){ el.appendChild(tok); updateSortCount(); }
   });
 }
 ['sortPool','zone-ow','zone-talon'].forEach(id=>wireZone(document.getElementById(id)));
@@ -1067,12 +1092,9 @@ document.getElementById('sortName').addEventListener('keydown',e=>{if(e.key==='E
 
 async function submitSort(){
   if(sortOver) return;
-  // every dealt hero must be placed in a side
+  // every dealt hero must be placed in a side (button is disabled until then, this is a safety net)
   const placed=[...document.querySelectorAll('#zone-ow .htoken, #zone-talon .htoken')];
-  if(placed.length < sortDeal.length){
-    document.getElementById('sortResult').textContent='Place all 5 heroes first!';
-    return;
-  }
+  if(placed.length < sortDeal.length) return;
   sortOver=true;
   document.getElementById('sortSubmit').disabled=true;
   let correct=0, delay=0;
@@ -1098,6 +1120,14 @@ async function submitSort(){
     confetti();
     document.querySelectorAll('.sort-col').forEach(c=>c.classList.add('celebrate'));
   }
+  // Slack-ready share text: verdicts in deal order, no hero names = no spoilers
+  const marks=sortDeal.map(n=>factionOf(n)===placedSide(n)?'✅':'❌').join('');
+  const shareStr=`BVID Faction Sort #${puzzleNumber()}\n${correct}/${sortDeal.length}${perfect?' — PERFECT! ⚔️':''}\n${marks}`;
+  const shareBtn=document.createElement('button');
+  shareBtn.className='sort-share'; shareBtn.textContent='📋 Copy result';
+  shareBtn.onclick=()=>copyTextToClipboard(shareStr,shareBtn);
+  res.insertAdjacentElement('afterend',shareBtn);
+  res.scrollIntoView({behavior:'smooth',block:'center'});
   markSorted(correct);
   await submitSortScore(correct);
   renderSortBoard();
