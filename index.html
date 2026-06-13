@@ -238,7 +238,7 @@
   .sort-pool{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;
     min-height:120px;margin:8px auto 22px;padding:14px;border-radius:var(--radius);
     background:var(--panel-dark);max-width:680px}
-  .sort-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:680px;margin:0 auto}
+  .sort-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:860px;margin:0 auto}
   .sort-col{background:var(--panel);border-radius:var(--radius);padding:14px;
     box-shadow:0 8px 26px rgba(0,0,0,.35)}
   .sort-col h4{text-align:center;font-family:'Orbitron';color:var(--text-dark);
@@ -279,7 +279,7 @@
   @keyframes resultpop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
   @keyframes glowpulse{0%,100%{box-shadow:0 8px 26px rgba(0,0,0,.35)}
     50%{box-shadow:0 0 34px 8px rgba(255,200,60,.6)}}
-  @media(max-width:560px){.sort-cols{grid-template-columns:1fr}}
+  @media(max-width:760px){.sort-cols{grid-template-columns:1fr}.dropzone{min-height:110px}}
   .lb-row .caret{font-size:13px;opacity:.5;transition:transform .2s}
   .lb-wrap.open .caret{transform:rotate(90deg)}
   .lb-detail{display:none;background:rgba(22,32,58,.05);border-radius:8px;
@@ -387,7 +387,7 @@
     <div class="namegate" id="sortGate">
       <div class="ng-card">
         <h2>Faction Sort</h2>
-        <p>Sort each of the 5 heroes into Overwatch or Talon — drag them, or just tap a hero to move it between columns. Enter your name to play.</p>
+        <p>Sort each of the 5 heroes into Overwatch, Talon, or Freelancer — drag them, or just tap a hero to move it between columns. Enter your name to play.</p>
         <input type="text" id="sortName" placeholder="Your name" maxlength="20" autocomplete="off">
         <button id="sortStartBtn">Start Faction Sort</button>
         <div class="ng-err" id="sortErr"></div>
@@ -404,6 +404,10 @@
         <div class="sort-col" data-side="Talon">
           <h4><span class="col-ic">🦅</span>Talon</h4>
           <div class="dropzone" id="zone-talon"></div>
+        </div>
+        <div class="sort-col" data-side="Freelancer">
+          <h4><span class="col-ic">🪙</span>Freelancer</h4>
+          <div class="dropzone" id="zone-free"></div>
         </div>
       </div>
       <div style="text-align:center;margin-top:18px">
@@ -999,20 +1003,29 @@ function showAlreadyPlayed(){
 // ============================================================
 //  FACTION SORT MODE
 // ============================================================
+// Factions per current canon (Reign of Talon, 2026):
+// - Vendetta took over Talon; Sombra, Widowmaker, and Reaper quit in protest -> Freelancers
+// - Emre & Freja (ex-Overwatch search-and-rescue) now work for Talon
+// - Doomfist was ousted (presumed dead) -> removed from the pool entirely
+// - Anran & Jetpack Cat joined Overwatch in Season 1; Kiriko joined the reformed OW earlier
+// - Freelancer = independent operators: deserters, mercs, and junkers with no faction
 const FACTIONS = {
-  Overwatch: ["Winston","Tracer","Mei","Genji","Mercy","Reinhardt","Brigitte","Echo","Lúcio","Pharah","Cassidy","Zarya","Baptiste","D.Va","Sojourn","Bastion","Ana","Soldier: 76","Torbjörn","Freja"],
-  Talon: ["Vendetta","Moira","Mauga","Emre","Mizuki","Doomfist","Sombra","Widowmaker","Sigma"]
+  Overwatch: ["Winston","Tracer","Mei","Genji","Mercy","Reinhardt","Brigitte","Echo","Lúcio","Pharah","Cassidy","Zarya","Baptiste","D.Va","Sojourn","Bastion","Ana","Soldier: 76","Torbjörn","Kiriko","Anran","Jetpack Cat"],
+  Talon: ["Vendetta","Moira","Mauga","Emre","Mizuki","Sigma","Freja"],
+  Freelancer: ["Sombra","Widowmaker","Reaper","Hanzo","Junkrat","Roadhog","Wrecking Ball"]
 };
 function factionOf(name){
   if(FACTIONS.Overwatch.includes(name)) return "Overwatch";
   if(FACTIONS.Talon.includes(name)) return "Talon";
+  if(FACTIONS.Freelancer.includes(name)) return "Freelancer";
   return null;
 }
-const SORT_POOL = [...FACTIONS.Overwatch, ...FACTIONS.Talon];
+const SORT_POOL = [...FACTIONS.Overwatch, ...FACTIONS.Talon, ...FACTIONS.Freelancer];
 
 let sortName='', sortDeal=[], sortOver=false, sortEntryId=null;
 
-// daily-seeded deal of 5 heroes (same for everyone that PT day), balanced-ish
+// daily-seeded deal of 5 heroes (same for everyone that PT day),
+// guaranteed to include at least one hero from each faction
 function dealFive(){
   const day=ptDayNumber();
   let seed=1013904223 ^ (day*1597334677);
@@ -1020,7 +1033,15 @@ function dealFive(){
     t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
   const order=[...SORT_POOL];
   for(let i=order.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[order[i],order[j]]=[order[j],order[i]];}
-  return order.slice(0,5);
+  // first hero of each faction in shuffled order, then fill to 5 from the top
+  const deal=[];
+  ['Overwatch','Talon','Freelancer'].forEach(f=>{
+    deal.push(order.find(n=>factionOf(n)===f));
+  });
+  for(const n of order){ if(deal.length>=5) break; if(!deal.includes(n)) deal.push(n); }
+  // re-shuffle the deal so the guaranteed picks aren't always in faction order
+  for(let i=deal.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[deal[i],deal[j]]=[deal[j],deal[i]];}
+  return deal;
 }
 
 function sortPlayedKey(){ return 'bvid_sort_'+dayKey(); }
@@ -1036,11 +1057,12 @@ function makeToken(name){
   t.innerHTML=`<img src="${avatar(h)}" onerror="${imgFallback(h)}"><span>${name}</span><span class="verdict"></span>`;
   t.addEventListener('dragstart',e=>{ t.classList.add('dragging'); e.dataTransfer.setData('text/plain',name); });
   t.addEventListener('dragend',()=>t.classList.remove('dragging'));
-  // tap-to-move (touchscreens can't use HTML5 drag): pool -> Overwatch -> Talon -> pool
+  // tap-to-move (touchscreens can't use HTML5 drag): pool -> Overwatch -> Talon -> Freelancer -> pool
   t.addEventListener('click',()=>{
     if(sortOver) return;
-    const next = t.parentElement.id==='sortPool' ? 'zone-ow'
-               : t.parentElement.id==='zone-ow'  ? 'zone-talon'
+    const next = t.parentElement.id==='sortPool'   ? 'zone-ow'
+               : t.parentElement.id==='zone-ow'    ? 'zone-talon'
+               : t.parentElement.id==='zone-talon' ? 'zone-free'
                : 'sortPool';
     document.getElementById(next).appendChild(t);
     updateSortCount();
@@ -1052,7 +1074,7 @@ function makeToken(name){
 function updateSortCount(){
   const btn=document.getElementById('sortSubmit');
   if(sortOver) return;
-  const placed=document.querySelectorAll('#zone-ow .htoken, #zone-talon .htoken').length;
+  const placed=document.querySelectorAll('#zone-ow .htoken, #zone-talon .htoken, #zone-free .htoken').length;
   const total=sortDeal.length||5;
   btn.disabled = placed<total;
   btn.textContent = placed<total ? `Place heroes (${placed}/${total})` : 'Submit Answers';
@@ -1061,7 +1083,7 @@ function updateSortCount(){
 function buildSortBoard(){
   sortDeal=dealFive();
   const pool=document.getElementById('sortPool');
-  pool.innerHTML=''; document.getElementById('zone-ow').innerHTML=''; document.getElementById('zone-talon').innerHTML='';
+  pool.innerHTML=''; ['zone-ow','zone-talon','zone-free'].forEach(z=>document.getElementById(z).innerHTML='');
   document.getElementById('sortResult').textContent='';
   sortDeal.forEach(n=>pool.appendChild(makeToken(n)));
   updateSortCount();
@@ -1078,7 +1100,7 @@ function wireZone(el){
     if(tok){ el.appendChild(tok); updateSortCount(); }
   });
 }
-['sortPool','zone-ow','zone-talon'].forEach(id=>wireZone(document.getElementById(id)));
+['sortPool','zone-ow','zone-talon','zone-free'].forEach(id=>wireZone(document.getElementById(id)));
 
 function startSort(){
   const n=document.getElementById('sortName').value.trim();
@@ -1093,13 +1115,13 @@ document.getElementById('sortName').addEventListener('keydown',e=>{if(e.key==='E
 async function submitSort(){
   if(sortOver) return;
   // every dealt hero must be placed in a side (button is disabled until then, this is a safety net)
-  const placed=[...document.querySelectorAll('#zone-ow .htoken, #zone-talon .htoken')];
+  const placed=[...document.querySelectorAll('#zone-ow .htoken, #zone-talon .htoken, #zone-free .htoken')];
   if(placed.length < sortDeal.length) return;
   sortOver=true;
   document.getElementById('sortSubmit').disabled=true;
   let correct=0, delay=0;
-  ['zone-ow','zone-talon'].forEach(zid=>{
-    const side = zid==='zone-ow' ? 'Overwatch' : 'Talon';
+  ['zone-ow','zone-talon','zone-free'].forEach(zid=>{
+    const side = zid==='zone-ow' ? 'Overwatch' : zid==='zone-talon' ? 'Talon' : 'Freelancer';
     document.querySelectorAll('#'+zid+' .htoken').forEach(tok=>{
       const right = factionOf(tok.dataset.name)===side;
       tok.style.animationDelay=(delay+=0.12)+'s';   // reveal verdicts one by one
@@ -1155,6 +1177,7 @@ async function submitSortScore(correct){
 function placedSide(name){
   if(document.querySelector(`#zone-ow .htoken[data-name="${CSS.escape(name)}"]`)) return 'Overwatch';
   if(document.querySelector(`#zone-talon .htoken[data-name="${CSS.escape(name)}"]`)) return 'Talon';
+  if(document.querySelector(`#zone-free .htoken[data-name="${CSS.escape(name)}"]`)) return 'Freelancer';
   return null;
 }
 
