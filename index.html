@@ -295,6 +295,31 @@
   .lb-detail .gmark.miss{color:var(--wrong)}
   .footer{text-align:center;margin-top:40px;opacity:.6;font-size:14px;font-family:'Orbitron'}
 
+  /* whose ult */
+  .ult-quote{max-width:680px;margin:0 auto;background:var(--panel-dark);border-radius:var(--radius);
+    padding:28px 34px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+  .ult-quote .qmark{font-family:'Orbitron';font-weight:800;font-size:38px;color:var(--accent);
+    line-height:1;display:block;margin-bottom:4px}
+  .ult-quote .qtext{font-family:'Orbitron';font-weight:600;font-size:24px;line-height:1.5;
+    text-shadow:0 2px 10px rgba(0,0,0,.5);transition:filter .3s}
+  .ult-quote.blurred .qtext{filter:blur(12px);user-select:none}
+  .ult-quote .qsub{margin-top:12px;font-size:13px;opacity:.6;font-weight:600;letter-spacing:1.5px}
+  .ult-quote .qreveal{margin-top:14px;display:flex;align-items:center;justify-content:center;gap:12px;
+    animation:resultpop .55s cubic-bezier(.2,.9,.3,1.25) both}
+  .ult-quote .qreveal img{width:64px;height:64px;border-radius:10px;object-fit:cover}
+  .ult-quote .qreveal .qname{font-family:'Orbitron';font-weight:800;font-size:22px;color:#7CFC9B}
+  .ult-hints{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:18px auto;max-width:680px}
+  .hintchip{background:var(--panel);color:var(--text-dark);border-radius:999px;padding:8px 18px;
+    font-family:'Orbitron';font-weight:600;font-size:14px;box-shadow:0 4px 14px rgba(0,0,0,.3);
+    animation:resultpop .4s both}
+  .hintchip b{color:#b54e00}
+  .uguesses{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:8px}
+  .uguess{display:flex;align-items:center;gap:12px;background:#fff;color:var(--text-dark);
+    border:2px solid var(--wrong);border-radius:10px;padding:8px 12px;font-weight:700;font-size:17px;
+    animation:shake .45s both}
+  .uguess img{width:48px;height:48px;border-radius:8px;object-fit:cover}
+  .uguess .um{margin-left:auto;color:var(--wrong);font-weight:800;font-size:20px}
+
   /* mobile */
   @media(max-width:640px){
     nav{gap:14px;padding:14px 18px}
@@ -331,6 +356,7 @@
   <div class="modes">
     <button class="mode-btn active" id="modeDailyBtn"><span class="ic">🎯</span>Hero of the Day</button>
     <button class="mode-btn" id="modeSortBtn"><span class="ic">⚔️</span>Faction Guess!</button>
+    <button class="mode-btn" id="modeUltBtn"><span class="ic">🔊</span>Whose Ult?</button>
   </div>
 
   <div id="view-daily">
@@ -424,7 +450,40 @@
     </div>
   </div>
 
-  <div class="footer">BVID OW · v1.2</div>
+  <div id="view-ult" style="display:none">
+    <div class="namegate" id="ultGate">
+      <div class="ng-card">
+        <h2>Whose Ult?</h2>
+        <p>One ultimate voice line, one hero. Every wrong guess unlocks a hint. Enter your name to play.</p>
+        <input type="text" id="ultName" placeholder="Your name" maxlength="20" autocomplete="off">
+        <button id="ultStartBtn">Start Today's Quote</button>
+        <div class="ng-err" id="ultErr"></div>
+      </div>
+    </div>
+
+    <div class="ult-quote blurred" id="ultQuoteCard">
+      <span class="qmark">“ ”</span>
+      <div class="qtext" id="ultQuote">…</div>
+      <div class="qsub" id="ultSub">ENEMY ULT LINE · TRANSLATED TO ENGLISH WHERE NEEDED</div>
+    </div>
+
+    <div class="playarea locked" id="ultArea">
+      <div class="guessbox">
+        <input type="text" id="ultInput" placeholder="Whose ult is it..." autocomplete="off" disabled aria-label="Guess the hero">
+        <div class="ac" id="ultAc"></div>
+      </div>
+      <div class="ult-hints" id="ultHints"></div>
+      <div class="uguesses" id="ultGuesses"></div>
+    </div>
+
+    <div class="leaderboard" id="ultLeaderboard">
+      <h3>🏆 Whose Ult? Leaderboard</h3>
+      <div class="date" id="ultLbDate"></div>
+      <div class="lb-list" id="ultLbList"><div class="lb-empty">Loading…</div></div>
+    </div>
+  </div>
+
+  <div class="footer">BVID OW · v1.3</div>
 </div>
 
 <script type="module">
@@ -1208,20 +1267,302 @@ async function renderSortBoard(){
   });
 }
 
-// ---- mode switching (Hero of the Day  /  Faction Guess) ----
+// ============================================================
+//  WHOSE ULT? MODE — guess the hero from their ultimate line
+//  Lines are the ENEMY (hostile) versions, shown in English.
+//  To add a hero, just add an entry; the pool updates itself.
+// ============================================================
+const ULT_LINES = {
+  "D.Va":        {line:"Nerf this!", lang:"English"},
+  "Doomfist":    {line:"Meteor strike!", lang:"English"},
+  "Domina":      {line:"Serve my design!", lang:"Punjabi"},
+  "Hazard":      {line:"Tear it down!", lang:"English"},
+  "Junker Queen":{line:"Time for the reckoning!", lang:"English"},
+  "Mauga":       {line:"Come on, stay a while!", lang:"Samoan"},
+  "Orisa":       {line:"Meet your fate!", lang:"Yoruba"},
+  "Reinhardt":   {line:"Hammer down!", lang:"English"},
+  "Roadhog":     {line:"Whole hog!", lang:"English"},
+  "Ramattra":    {line:"Suffer, as I have!", lang:"English"},
+  "Sigma":       {line:"The universe sings to me!", lang:"Dutch"},
+  "Wrecking Ball":{line:"Area denied!", lang:"English"},
+  "Zarya":       {line:"Fire at will!", lang:"Russian"},
+  "Ashe":        {line:"B.O.B.! Do something!", lang:"English"},
+  "Anran":       {line:"Flaming feathers, scorch the sky!", lang:"Chinese"},
+  "Cassidy":     {line:"It's high noon.", lang:"English"},
+  "Emre":        {line:"Search and destroy!", lang:"Finnish"},
+  "Freja":       {line:"I'll hunt them down!", lang:"Danish"},
+  "Echo":        {line:"Adaptive circuits engaged!", lang:"English"},
+  "Genji":       {line:"Take the blade of the dragon god!", lang:"Japanese"},
+  "Hanzo":       {line:"Let the dragon consume my enemies!", lang:"Japanese"},
+  "Junkrat":     {line:"Fire in the hole!", lang:"English"},
+  "Mei":         {line:"Freeze! Don't move!", lang:"Chinese"},
+  "Pharah":      {line:"Justice rains from above!", lang:"English"},
+  "Reaper":      {line:"Die… die… die.", lang:"English"},
+  "Symmetra":    {line:"This is the true reality!", lang:"Hindi"},
+  "Sombra":      {line:"Turning out the lights!", lang:"Spanish"},
+  "Sojourn":     {line:"This ends now!", lang:"English"},
+  "Soldier: 76": {line:"I've got you in my sights.", lang:"English"},
+  "Torbjörn":    {line:"Molten core!", lang:"English"},
+  "Venture":     {line:"Excavation initiation!", lang:"English"},
+  "Vendetta":    {line:"Retribution comes!", lang:"Italian"},
+  "Widowmaker":  {line:"No one can hide from my sight.", lang:"French"},
+  "Ana":         {line:"Unleash your inner strength!", lang:"Arabic"},
+  "Brigitte":    {line:"Rally to me!", lang:"Swedish"},
+  "Baptiste":    {line:"Light them up!", lang:"Haitian Creole"},
+  "Illari":      {line:"The sun rises!", lang:"Quechua"},
+  "Juno":        {line:"Locking satellite vector!", lang:"English"},
+  "Kiriko":      {line:"O fox spirit, unleash your claws!", lang:"Japanese"},
+  "Lifeweaver":  {line:"Life protects life!", lang:"Thai"},
+  "Lúcio":       {line:"Let's show these guys up!", lang:"Brazilian Portuguese"},
+  "Mercy":       {line:"Heroes never die!", lang:"German"},
+  "Mizuki":      {line:"I'll break the curse!", lang:"English"},
+  "Moira":       {line:"Submit to my will!", lang:"Irish"},
+  "Wuyang":      {line:"Reverse the tide!", lang:"Chinese"},
+  "Zenyatta":    {line:"Pass into the Iris.", lang:"English"}
+  // No usable spoken ult line (sounds only), so excluded from the pool:
+  // Winston (roar), Bastion (beeps), Jetpack Cat (cat sounds), Tracer (random quips), Sierra (add hers here!)
+};
+const ULT_POOL = Object.keys(ULT_LINES).filter(n=>ULT_LINES[n].line && ROSTER.some(h=>h.name===n));
+
+let ultTarget=null, ultGuessList=[], ultOver=false, ultPlayer='', ultEntryId=null;
+
+// daily-seeded pick over the ult pool, reshuffled each full cycle (same pattern as hero of the day)
+function dailyUltHero(){
+  const day=ptDayNumber(), n=ULT_POOL.length;
+  const cycle=Math.floor(day/n), pos=((day%n)+n)%n;
+  let seed=374761393^(cycle*668265263);
+  const rng=()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);
+    t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
+  const order=[...Array(n).keys()];
+  for(let i=n-1;i>0;i--){const j=Math.floor(rng()*(i+1));[order[i],order[j]]=[order[j],order[i]];}
+  return ROSTER.find(h=>h.name===ULT_POOL[order[pos]]);
+}
+
+function ultPlayedKey(){ return 'bvid_ult_'+dayKey(); }
+function hasUltedToday(){ try{ return localStorage.getItem(ultPlayedKey())!==null; }catch(e){ return false; } }
+function markUlted(){ try{ localStorage.setItem(ultPlayedKey(), JSON.stringify({name:ultPlayer,turns:ultGuessList.length,ts:Date.now()})); }catch(e){} }
+function ultProgKey(){ return 'bvid_ultprog_'+dayKey(); }
+function saveUltProgress(){ try{ localStorage.setItem(ultProgKey(), JSON.stringify({name:ultPlayer,guesses:ultGuessList})); }catch(e){} }
+function clearUltProgress(){ try{ localStorage.removeItem(ultProgKey()); }catch(e){} }
+
+const ultInput=document.getElementById('ultInput');
+const ultAc=document.getElementById('ultAc');
+
+// hints unlock one per wrong guess
+function ultHintList(){
+  const t=ultTarget;
+  return [
+    `Role: <b>${t.role}</b>`,
+    `Heard in: <b>${ULT_LINES[t.name].lang}</b>`,
+    `Released: <b>${t.release}</b>`,
+    `From: <b>${t.continent}</b>`,
+    `Starts with: <b>${t.name[0]}</b>`
+  ];
+}
+function renderUltHints(){
+  const el=document.getElementById('ultHints');
+  el.innerHTML='';
+  ultHintList().slice(0,Math.min(ultGuessList.length,5)).forEach(h=>{
+    const c=document.createElement('div'); c.className='hintchip'; c.innerHTML=h; el.appendChild(c);
+  });
+}
+function renderUltGuesses(){
+  const el=document.getElementById('ultGuesses');
+  el.innerHTML='';
+  [...ultGuessList].reverse().forEach(name=>{
+    if(name===ultTarget.name) return;
+    const g=ROSTER.find(h=>h.name===name);
+    const row=document.createElement('div'); row.className='uguess';
+    row.innerHTML=`<img src="${avatar(g)}" onerror="${imgFallback(g)}"><span>${g.name}</span><span class="um">✕</span>`;
+    el.appendChild(row);
+  });
+}
+
+function makeUltGuess(name){
+  if(ultOver || !ultPlayer) return;
+  const g=ROSTER.find(h=>ULT_POOL.includes(h.name) && h.name.toLowerCase()===name.toLowerCase());
+  if(!g) return;
+  if(ultGuessList.includes(g.name)) return;
+  ultGuessList.push(g.name); ultInput.value=''; ultAc.innerHTML=''; ultAcIdx=-1;
+  saveUltProgress();
+  if(g.name===ultTarget.name){ ultWin(); }
+  else{ renderUltGuesses(); renderUltHints(); }
+}
+
+function ultWin(){
+  ultOver=true; ultInput.disabled=true; ultAc.innerHTML='';
+  clearUltProgress();
+  renderUltGuesses();
+  const card=document.getElementById('ultQuoteCard');
+  card.classList.remove('blurred');
+  const rev=document.createElement('div'); rev.className='qreveal';
+  rev.innerHTML=`<img src="${avatar(ultTarget)}" onerror="${imgFallback(ultTarget)}"><span class="qname">${ultTarget.name}</span>`;
+  card.appendChild(rev);
+  document.getElementById('ultSub').textContent='SOLVED!';
+  const w=document.createElement('div'); w.className='win';
+  const n=ultGuessList.length;
+  w.innerHTML=`<h2>Solved!</h2>
+    <p><b>${escapeHtml(ultPlayer)}</b> named <b>${ultTarget.name}</b> in <b>${n}</b> ${n===1?'guess':'guesses'}.</p>
+    <button class="share-btn" id="ultShareBtn">📋 Copy result</button>
+    <p class="lb-note" id="ultStatus">Submitting your score…</p>`;
+  document.getElementById('ultArea').insertAdjacentElement('afterend',w);
+  const marks='❌'.repeat(Math.max(0,n-1))+'✅';
+  const shareStr=`BVID Whose Ult? #${puzzleNumber()}\nNamed the hero in ${n} ${n===1?'guess':'guesses'} 🔊\n${marks}`;
+  document.getElementById('ultShareBtn').onclick=e=>copyTextToClipboard(shareStr,e.currentTarget);
+  w.scrollIntoView({behavior:'smooth',block:'center'});
+  confetti();
+  markUlted();
+  submitUltScore();
+}
+
+async function submitUltScore(){
+  ultEntryId='uid_'+Math.random().toString(36).slice(2,9);
+  const entry={ id:ultEntryId, name:ultPlayer.slice(0,20), turns:ultGuessList.length,
+    ts:Date.now(), day:dayKey(), guesses:[...ultGuessList] };
+  const status=document.getElementById('ultStatus');
+  try{
+    if(!db) throw new Error('Leaderboard backend not configured.');
+    await addDoc(collection(db,'ultScores'), entry);
+    if(status) status.textContent='Score saved! Come back tomorrow for a new quote.';
+  }catch(err){
+    console.error('Ult score save failed:',err);
+    if(status){ status.textContent='Could not save score: '+(err&&err.message?err.message:err); status.style.color='#ffb3b3'; }
+  }
+  renderUltBoard();
+}
+
+async function renderUltBoard(){
+  const listEl=document.getElementById('ultLbList');
+  document.getElementById('ultLbDate').textContent=dayKey();
+  let board=[];
+  try{
+    if(db){
+      const q=query(collection(db,'ultScores'), where('day','==',dayKey()));
+      const snap=await getDocs(q);
+      board=snap.docs.map(d=>d.data());
+    }
+  }catch(err){ console.error(err); }
+  if(!board.length){ listEl.innerHTML='<div class="lb-empty">No scores yet today — be the first!</div>'; return; }
+  board.sort((a,b)=> a.turns-b.turns || a.ts-b.ts);
+  const reveal = ultOver || hasUltedToday();
+  listEl.innerHTML='';
+  board.forEach((e,i)=>{
+    const wrap=document.createElement('div'); wrap.className='lb-wrap';
+    const rc=i===0?'r1':i===1?'r2':i===2?'r3':'';
+    const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
+    if(reveal){
+      const gl=(e.guesses&&e.guesses.length)
+        ? e.guesses.map((gn,gi)=>{
+            const last=gi===e.guesses.length-1;
+            return `<div class="gline"><span class="gnum">${gi+1}</span>
+              <span class="gname">${escapeHtml(gn)}</span>
+              <span class="gmark ${last?'hit':'miss'}">${last?'✓':'✕'}</span></div>`;
+          }).join('')
+        : '<div class="gline" style="opacity:.6">No guess history recorded.</div>';
+      wrap.innerHTML=`
+        <div class="lb-row${e.id===ultEntryId?' me':''}">
+          <div class="rank ${rc}">${medal}</div>
+          <div class="nm">${escapeHtml(e.name)}</div>
+          <div class="turns">${e.turns} ${e.turns===1?'turn':'turns'} <span class="caret">▶</span></div>
+        </div>
+        <div class="lb-detail">${gl}</div>`;
+      wrap.querySelector('.lb-row').onclick=()=>wrap.classList.toggle('open');
+    } else {
+      wrap.innerHTML=`
+        <div class="lb-row locked-row">
+          <div class="rank ${rc}">${medal}</div>
+          <div class="nm">${escapeHtml(e.name)}</div>
+          <div class="turns">${e.turns} ${e.turns===1?'turn':'turns'}</div>
+        </div>`;
+    }
+    listEl.appendChild(wrap);
+  });
+}
+
+// autocomplete over the ult pool (same keyboard behavior as the daily game)
+let ultAcIdx=-1;
+ultInput.addEventListener('input',()=>{
+  const v=ultInput.value.trim().toLowerCase();
+  ultAc.innerHTML=''; ultAcIdx=-1;
+  if(!v) return;
+  const pool=ROSTER.filter(h=>ULT_POOL.includes(h.name) && !ultGuessList.includes(h.name));
+  const starts=pool.filter(h=>h.name.toLowerCase().startsWith(v));
+  const contains=pool.filter(h=>!starts.includes(h) && h.name.toLowerCase().includes(v));
+  [...starts,...contains].slice(0,5).forEach(h=>{
+    const o=document.createElement('div'); o.className='opt';
+    o.innerHTML=`<img class="pf" src="${avatar(h)}" onerror="${imgFallback(h)}"><div class="nm">${h.name}</div>`;
+    o.onclick=()=>makeUltGuess(h.name);
+    ultAc.appendChild(o);
+  });
+});
+ultInput.addEventListener('keydown',e=>{
+  const opts=[...ultAc.children];
+  if(e.key==='ArrowDown' && opts.length){ e.preventDefault(); ultAcIdx=(ultAcIdx+1)%opts.length; opts.forEach((o,i)=>o.classList.toggle('kb',i===ultAcIdx)); return; }
+  if(e.key==='ArrowUp' && opts.length){ e.preventDefault(); ultAcIdx=(ultAcIdx-1+opts.length)%opts.length; opts.forEach((o,i)=>o.classList.toggle('kb',i===ultAcIdx)); return; }
+  if(e.key==='Escape'){ ultAc.innerHTML=''; ultAcIdx=-1; return; }
+  if(e.key==='Enter'){
+    const typed=ultInput.value.trim();
+    const exact=ROSTER.find(h=>ULT_POOL.includes(h.name)&&h.name.toLowerCase()===typed.toLowerCase());
+    if(exact){ makeUltGuess(exact.name); return; }
+    if(ultAcIdx>=0 && opts[ultAcIdx]){ makeUltGuess(opts[ultAcIdx].querySelector('.nm').textContent); return; }
+    const first=ultAc.querySelector('.opt .nm');
+    if(first) makeUltGuess(first.textContent);
+  }
+});
+
+function startUlt(){
+  const n=document.getElementById('ultName').value.trim();
+  if(!n){ document.getElementById('ultErr').textContent='Please enter a name to start.'; return; }
+  ultPlayer=n;
+  document.getElementById('ultGate').style.display='none';
+  document.getElementById('ultQuoteCard').classList.remove('blurred');
+  document.getElementById('ultArea').classList.remove('locked');
+  ultInput.disabled=false;
+  saveUltProgress();
+  ultInput.focus();
+}
+document.getElementById('ultStartBtn').onclick=startUlt;
+document.getElementById('ultName').addEventListener('keydown',e=>{if(e.key==='Enter')startUlt();});
+
+function initUlt(){
+  ultTarget=dailyUltHero();
+  document.getElementById('ultQuote').textContent='“'+ULT_LINES[ultTarget.name].line+'”';
+  if(hasUltedToday()){
+    let prev={}; try{ prev=JSON.parse(localStorage.getItem(ultPlayedKey())||'{}'); }catch(e){}
+    document.getElementById('ultQuoteCard').classList.remove('blurred');
+    document.getElementById('ultGate').innerHTML=`<div class="ng-card">
+      <h2>Already played today</h2>
+      <p><b>${escapeHtml(prev.name||'You')}</b> already named today's hero in <b>${prev.turns}</b> ${prev.turns===1?'guess':'guesses'}.</p>
+      <p style="font-size:14px;opacity:.7">A new quote unlocks at midnight Pacific Time.</p></div>`;
+  } else {
+    // resume an in-progress game after a refresh
+    let p=null; try{ p=JSON.parse(localStorage.getItem(ultProgKey())||'null'); }catch(e){}
+    if(p && p.name){
+      ultPlayer=p.name;
+      ultGuessList=Array.isArray(p.guesses)?p.guesses.filter(n=>ULT_POOL.includes(n)):[];
+      document.getElementById('ultGate').style.display='none';
+      document.getElementById('ultQuoteCard').classList.remove('blurred');
+      document.getElementById('ultArea').classList.remove('locked');
+      ultInput.disabled=false;
+      renderUltGuesses(); renderUltHints();
+    }
+  }
+  renderUltBoard().catch(e=>console.warn('ult board load failed',e));
+}
+
+// ---- mode switching (Hero of the Day / Faction Guess / Whose Ult?) ----
 const modeDailyBtn=document.getElementById('modeDailyBtn');
 const modeSortBtn=document.getElementById('modeSortBtn');
+const modeUltBtn=document.getElementById('modeUltBtn');
 const viewDaily=document.getElementById('view-daily');
 const viewSort=document.getElementById('view-sort');
-let sortBuilt=false;
-modeDailyBtn.onclick=()=>{
-  modeDailyBtn.classList.add('active'); modeSortBtn.classList.remove('active');
-  viewDaily.style.display=''; viewSort.style.display='none';
-};
-modeSortBtn.onclick=()=>{
-  modeSortBtn.classList.add('active'); modeDailyBtn.classList.remove('active');
-  viewSort.style.display=''; viewDaily.style.display='none';
-  if(!sortBuilt){
+const viewUlt=document.getElementById('view-ult');
+let sortBuilt=false, ultBuilt=false;
+
+function setMode(m){
+  [[modeDailyBtn,viewDaily,'daily'],[modeSortBtn,viewSort,'sort'],[modeUltBtn,viewUlt,'ult']]
+    .forEach(([b,v,k])=>{ b.classList.toggle('active',k===m); v.style.display=(k===m)?'':'none'; });
+  if(m==='sort' && !sortBuilt){
     sortBuilt=true;
     buildSortBoard();
     if(hasSortedToday()){
@@ -1231,10 +1572,13 @@ modeSortBtn.onclick=()=>{
         <p><b>${escapeHtml(prev.name||'You')}</b> already sorted today: <b>${prev.score}/5</b>.</p>
         <p style="font-size:14px;opacity:.7">A new set of 5 unlocks at midnight Pacific Time.</p></div>`;
     }
-    // load leaderboard separately so a slow/blocked backend can't block the view switch
     renderSortBoard().catch(e=>console.warn('sort board load failed',e));
   }
-};
+  if(m==='ult' && !ultBuilt){ ultBuilt=true; initUlt(); }
+}
+modeDailyBtn.onclick=()=>setMode('daily');
+modeSortBtn.onclick=()=>setMode('sort');
+modeUltBtn.onclick=()=>setMode('ult');
 
 target=pickTarget();
 document.getElementById('puzzleNum').textContent=`PUZZLE #${puzzleNumber()}`;
