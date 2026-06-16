@@ -65,40 +65,38 @@
     position:relative;display:flex;flex-direction:column;border-radius:var(--radius);overflow:hidden;
     background:linear-gradient(158deg,rgba(255,255,255,.08),rgba(255,255,255,.015));
     border:1px solid rgba(255,255,255,.10);
-    padding:0;min-height:232px;
+    padding:28px 26px 24px;min-height:248px;
     transition:transform .24s cubic-bezier(.2,.8,.3,1), border-color .24s, box-shadow .24s;
     animation:rise .6s ease both;
   }
-  /* top strip holds the IP number + the logo slot, kept clear of the title */
-  .card .cardtop{
-    display:flex;align-items:flex-start;justify-content:space-between;
-    padding:22px 24px 0;
+  /* glow that washes up from the card's accent color */
+  .card::after{
+    content:"";position:absolute;left:0;right:0;bottom:0;height:55%;pointer-events:none;
+    background:radial-gradient(120% 90% at 50% 130%, color-mix(in srgb,var(--c) 26%,transparent), transparent 70%);
+    opacity:.5;transition:opacity .25s;
   }
-  .card .ip-no{
-    font-family:'Orbitron';font-weight:700;font-size:12px;letter-spacing:2.5px;
-    color:var(--text-dim);opacity:.65;padding-top:8px;
-  }
-  /* the logo slot — reserved space; drop a real logo <img> in here */
+  /* logo slot — now the hero of the card, top-centered */
   .card .logo-slot{
-    flex-shrink:0;width:66px;height:66px;border-radius:15px;
+    position:relative;z-index:1;width:84px;height:84px;border-radius:20px;margin-bottom:18px;
     display:grid;place-items:center;overflow:hidden;
-    background:color-mix(in srgb, var(--c) 16%, transparent);
-    border:1px solid color-mix(in srgb, var(--c) 38%, transparent);
+    background:color-mix(in srgb, var(--c) 18%, transparent);
+    border:1px solid color-mix(in srgb, var(--c) 40%, transparent);
+    transition:transform .24s, background .24s, border-color .24s;
   }
-  .card .logo-slot img{width:100%;height:100%;object-fit:contain;padding:8px}
+  .card .logo-slot img{width:100%;height:100%;object-fit:contain;padding:10px}
   .card .logo-slot .ph{
-    font-family:'Orbitron';font-weight:800;font-size:22px;
-    color:color-mix(in srgb, var(--c) 75%, #fff);
+    font-family:'Orbitron';font-weight:800;font-size:26px;
+    color:color-mix(in srgb, var(--c) 78%, #fff);
   }
-  .card .cardbody{padding:14px 24px 22px;display:flex;flex-direction:column;flex:1}
-  .card h2{font-family:'Orbitron';font-weight:800;font-size:26px;margin:0 0 8px;line-height:1.08}
-  .card .blurb{font-size:15.5px;color:var(--text-dim);line-height:1.5;max-width:240px}
+  .card h2{position:relative;z-index:1;font-family:'Orbitron';font-weight:800;font-size:25px;
+    margin:0 0 9px;line-height:1.08}
+  .card .blurb{position:relative;z-index:1;font-size:15.5px;color:var(--text-dim);line-height:1.5}
   .card .accentbar{
     position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c);
     transform:scaleY(.35);transform-origin:top;transition:transform .25s;opacity:.9;
   }
-  .card .footrow{margin-top:auto;padding-top:16px;display:flex;align-items:center;
-    justify-content:space-between;gap:10px}
+  .card .footrow{position:relative;z-index:1;margin-top:auto;padding-top:18px;
+    display:flex;align-items:center;justify-content:space-between;gap:10px}
   .card .cta{
     display:inline-flex;align-items:center;gap:9px;
     font-family:'Orbitron';font-weight:700;font-size:14px;letter-spacing:1px;color:var(--c);
@@ -112,11 +110,13 @@
     border-color:color-mix(in srgb, var(--c) 55%, transparent);
     box-shadow:0 22px 55px rgba(0,0,0,.55), 0 0 0 1px color-mix(in srgb,var(--c) 30%,transparent);
   }
+  .card.live:hover::after{opacity:.85}
   .card.live:hover .accentbar{transform:scaleY(1)}
   .card.live:hover .cta .arr{transform:translateX(5px)}
   .card.live:hover .logo-slot{
-    background:color-mix(in srgb, var(--c) 26%, transparent);
-    border-color:color-mix(in srgb, var(--c) 60%, transparent);
+    transform:translateY(-2px) scale(1.04);
+    background:color-mix(in srgb, var(--c) 28%, transparent);
+    border-color:color-mix(in srgb, var(--c) 62%, transparent);
   }
   .badge{
     display:inline-block;font-family:'Orbitron';font-weight:700;font-size:11px;letter-spacing:1.5px;
@@ -126,11 +126,12 @@
     color:#fff;border:1px solid color-mix(in srgb,var(--c) 58%,transparent)}
 
   /* locked cards */
-  .card.locked{opacity:.6;filter:saturate(.55)}
+  .card.locked{opacity:.62;filter:saturate(.55)}
+  .card.locked::after{opacity:.28}
   .card.locked .blurb{opacity:.9}
   .badge.soon{background:rgba(255,255,255,.06);color:var(--text-dim);
     border:1px solid rgba(255,255,255,.14)}
-  .card.locked .logo-slot{opacity:.8}
+  .card.locked .logo-slot{opacity:.82}
   .card.locked .lockico{font-size:16px;opacity:.5}
   .card.locked:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.2)}
 
@@ -172,90 +173,60 @@
       <a class="card live" style="--c:#ff7a00" href="Overwatch/index.html"
          onmouseenter="lightUp('#ff7a00')" onmouseleave="resetBg()">
         <span class="accentbar"></span>
-        <div class="cardtop">
-          <div class="ip-no">IP 01</div>
-          <!-- Drop your logo here: <img src="logos/overwatch.png" alt="Overwatch"> -->
-          <div class="logo-slot"><span class="ph">OW</span></div>
-        </div>
-        <div class="cardbody">
-          <h2>Overwatch</h2>
-          <p class="blurb">Hero of the Day, Faction Sort, and Whose Ult? — three daily puzzles.</p>
-          <div class="footrow">
-            <span class="badge play">▶ 3 games live</span>
-            <span class="cta">Enter <span class="arr">→</span></span>
-          </div>
+        <div class="logo-slot"><span class="ph">OW</span></div>
+        <h2>Overwatch</h2>
+        <p class="blurb">Hero of the Day, Faction Sort, and Whose Ult? Three daily puzzles are here!</p>
+        <div class="footrow">
+          <span class="badge play">▶ 3 games live</span>
+          <span class="cta">Enter <span class="arr">→</span></span>
         </div>
       </a>
 
       <!-- LOCKED: World of Warcraft -->
       <div class="card locked" style="--c:#3fb56a">
         <span class="accentbar"></span>
-        <div class="cardtop">
-          <div class="ip-no">IP 02</div>
-          <!-- Drop your logo here: <img src="logos/wow.png" alt="World of Warcraft"> -->
-          <div class="logo-slot"><span class="ph">WoW</span></div>
-        </div>
-        <div class="cardbody">
-          <h2>World of Warcraft</h2>
-          <p class="blurb">Class, race &amp; faction guessing across Azeroth. In the forge.</p>
-          <div class="footrow">
-            <span class="badge soon">Coming soon</span>
-            <span class="lockico">🔒</span>
-          </div>
+        <div class="logo-slot"><span class="ph">WoW</span></div>
+        <h2>World of Warcraft</h2>
+        <p class="blurb">Class, race &amp; faction guessing across Azeroth.</p>
+        <div class="footrow">
+          <span class="badge soon">Coming soon</span>
+          <span class="lockico">🔒</span>
         </div>
       </div>
 
       <!-- LOCKED: Heroes of the Storm -->
       <div class="card locked" style="--c:#8a5cff">
         <span class="accentbar"></span>
-        <div class="cardtop">
-          <div class="ip-no">IP 03</div>
-          <!-- Drop your logo here: <img src="logos/hots.png" alt="Heroes of the Storm"> -->
-          <div class="logo-slot"><span class="ph">HotS</span></div>
-        </div>
-        <div class="cardbody">
-          <h2>Heroes of the Storm</h2>
-          <p class="blurb">Every Blizzard universe collides. Guess the Nexus roster.</p>
-          <div class="footrow">
-            <span class="badge soon">Coming soon</span>
-            <span class="lockico">🔒</span>
-          </div>
+        <div class="logo-slot"><span class="ph">HotS</span></div>
+        <h2>Heroes of the Storm</h2>
+        <p class="blurb">Every Blizzard universe collides. Guess the Nexus roster.</p>
+        <div class="footrow">
+          <span class="badge soon">Coming soon</span>
+          <span class="lockico">🔒</span>
         </div>
       </div>
 
       <!-- LOCKED: StarCraft -->
       <div class="card locked" style="--c:#2bb6d6">
         <span class="accentbar"></span>
-        <div class="cardtop">
-          <div class="ip-no">IP 04</div>
-          <!-- Drop your logo here: <img src="logos/starcraft.png" alt="StarCraft"> -->
-          <div class="logo-slot"><span class="ph">SC</span></div>
-        </div>
-        <div class="cardbody">
-          <h2>StarCraft</h2>
-          <p class="blurb">Terran, Zerg, or Protoss? Sort units and name the heroes.</p>
-          <div class="footrow">
-            <span class="badge soon">Coming soon</span>
-            <span class="lockico">🔒</span>
-          </div>
+        <div class="logo-slot"><span class="ph">SC</span></div>
+        <h2>StarCraft</h2>
+        <p class="blurb">Terran, Zerg, or Protoss? Sort units and name the heroes.</p>
+        <div class="footrow">
+          <span class="badge soon">Coming soon</span>
+          <span class="lockico">🔒</span>
         </div>
       </div>
 
       <!-- LOCKED: Diablo -->
       <div class="card locked" style="--c:#c5392f">
         <span class="accentbar"></span>
-        <div class="cardtop">
-          <div class="ip-no">IP 05</div>
-          <!-- Drop your logo here: <img src="logos/diablo.png" alt="Diablo"> -->
-          <div class="logo-slot"><span class="ph">D</span></div>
-        </div>
-        <div class="cardbody">
-          <h2>Diablo</h2>
-          <p class="blurb">Sanctuary's classes and the Burning Hells' worst. Coming from the depths.</p>
-          <div class="footrow">
-            <span class="badge soon">Coming soon</span>
-            <span class="lockico">🔒</span>
-          </div>
+        <div class="logo-slot"><span class="ph">D</span></div>
+        <h2>Diablo</h2>
+        <p class="blurb">Sanctuary's classes and the Lilith's worst. Coming from the depths of Hell.</p>
+        <div class="footrow">
+          <span class="badge soon">Coming soon</span>
+          <span class="lockico">🔒</span>
         </div>
       </div>
     </div>
