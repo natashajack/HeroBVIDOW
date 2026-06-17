@@ -175,24 +175,25 @@
         <span class="accentbar"></span>
         <div class="logo-slot"><span class="ph">OW</span></div>
         <h2>Overwatch</h2>
-        <p class="blurb">Hero of the Day, Faction Sort, and Whose Ult? Three daily puzzles are here!</p>
+        <p class="blurb">Hero of the Day, Faction Sort, and Whose Ult? — three daily puzzles.</p>
         <div class="footrow">
           <span class="badge play">▶ 3 games live</span>
           <span class="cta">Enter <span class="arr">→</span></span>
         </div>
       </a>
 
-      <!-- LOCKED: World of Warcraft -->
-      <div class="card locked" style="--c:#3fb56a">
+      <!-- LIVE: World of Warcraft -->
+      <a class="card live" style="--c:#3fb56a" href="wow/index.html"
+         onmouseenter="lightUp('#3fb56a')" onmouseleave="resetBg()">
         <span class="accentbar"></span>
         <div class="logo-slot"><span class="ph">WoW</span></div>
         <h2>World of Warcraft</h2>
-        <p class="blurb">Class, race &amp; faction guessing across Azeroth.</p>
+        <p class="blurb">Character of the Day, Who's That Character, faction sort, and more — five daily puzzles.</p>
         <div class="footrow">
-          <span class="badge soon">Coming soon</span>
-          <span class="lockico">🔒</span>
+          <span class="badge play">▶ 5 games live</span>
+          <span class="cta">Enter <span class="arr">→</span></span>
         </div>
-      </div>
+      </a>
 
       <!-- LOCKED: Heroes of the Storm -->
       <div class="card locked" style="--c:#8a5cff">
@@ -223,7 +224,7 @@
         <span class="accentbar"></span>
         <div class="logo-slot"><span class="ph">D</span></div>
         <h2>Diablo</h2>
-        <p class="blurb">Sanctuary's classes and the Lilith's worst. Coming from the depths of Hell.</p>
+        <p class="blurb">Sanctuary's classes and the Burning Hells' worst. Coming from the depths.</p>
         <div class="footrow">
           <span class="badge soon">Coming soon</span>
           <span class="lockico">🔒</span>
@@ -233,7 +234,7 @@
 
     <footer>
       BLIZZARD VIDEO · GAMES HUB · v1.0
-      <div class="small">An unofficial project for the Blizzard Video Team - Created by Natasha Manger</div>
+      <div class="small">An unofficial project for the Blizzard Video Team</div>
     </footer>
   </div>
 
@@ -244,11 +245,11 @@
   //  Example: "World of Warcraft": "https://your-image-url/wow.png"
   // ============================================================
   const LOGOS = {
-    "Overwatch":          "https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Overwatch_circle_logo.svg/1280px-Overwatch_circle_logo.svg.png",
-    "World of Warcraft":  "https://cdn.freebiesupply.com/logos/large/2x/world-of-warcraft-logo-png-transparent.png",
-    "Heroes of the Storm":"https://pbs.twimg.com/profile_images/1394703004134117377/ZvrBGCC__400x400.jpg",
-    "StarCraft":          "https://pbs.twimg.com/profile_images/1316868007763742720/quhwA225_400x400.jpg",
-    "Diablo":             "https://pbs.twimg.com/profile_images/1667287416154243072/i4pAQMRB_400x400.jpg"
+    "Overwatch":          "",
+    "World of Warcraft":  "",
+    "Heroes of the Storm":"",
+    "StarCraft":          "",
+    "Diablo":             ""
   };
 
   // drop each provided URL into its card's logo slot; blanks keep the placeholder
