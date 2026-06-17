@@ -227,6 +227,30 @@
     border-radius:10px;font-family:'Orbitron';font-weight:600;font-size:16px;cursor:pointer;transition:.15s}
   .ng-card button:hover{filter:brightness(1.08)}
   .ng-err{color:#c0392b;font-size:14px;font-weight:600;margin-top:10px;min-height:18px}
+  /* name picker */
+  .name-select{width:100%;padding:14px 16px;font-size:18px;font-family:'Rajdhani';font-weight:600;
+    border:2px solid var(--accent);border-radius:10px;outline:none;color:var(--text-dark);
+    margin-bottom:12px;background:#fff;cursor:pointer}
+  .other-wrap{margin-bottom:12px;text-align:left}
+  .other-note{font-size:13px;opacity:.7;margin:0 0 8px;line-height:1.4}
+  .other-input{width:100%;padding:14px 16px;font-size:18px;font-family:'Rajdhani';font-weight:600;
+    border:2px solid var(--accent);border-radius:10px;outline:none;color:var(--text-dark)}
+  /* all-time board */
+  .lb-toggle{display:flex;gap:8px;justify-content:center;margin-bottom:14px}
+  .lb-toggle button{background:rgba(22,32,58,.08);color:var(--text-dark);border:none;
+    padding:8px 20px;border-radius:8px;font-family:'Orbitron';font-weight:600;font-size:13px;
+    cursor:pointer;transition:.15s;opacity:.6}
+  .lb-toggle button.active{background:var(--accent);color:#fff;opacity:1}
+  .lb-row .pts{font-family:'Orbitron';font-weight:800;font-size:15px;color:var(--accent)}
+  .lb-row .wins{font-family:'Orbitron';font-size:12px;opacity:.7;margin-left:6px}
+  .lb-detail .gtime{margin-left:auto;font-size:12px;opacity:.6;font-family:'Orbitron'}
+  .lb-meta{font-size:11px;opacity:.55;font-family:'Orbitron';letter-spacing:.5px;
+    text-align:center;margin-top:10px;line-height:1.6}
+  .lb-allrow{display:grid;grid-template-columns:36px 1fr auto;align-items:center;gap:10px;
+    padding:10px 14px;border-radius:8px;background:rgba(22,32,58,.06);font-weight:600;font-size:16px}
+  .lb-allrow.me{background:rgba(255,122,0,.18);outline:2px solid var(--accent)}
+  .lb-allrow .rank{font-family:'Orbitron';font-weight:800;text-align:center}
+  .lb-allrow .rank.r1{color:#d4a017}.lb-allrow .rank.r2{color:#9aa0b8}.lb-allrow .rank.r3{color:#b06a3a}
   .playarea.locked{opacity:.35;pointer-events:none;filter:grayscale(.4)}
 
   /* expandable leaderboard rows */
@@ -403,7 +427,11 @@
   </div>
 
   <div class="leaderboard" id="leaderboard">
-    <h3>🏆 Daily Leaderboard</h3>
+    <h3>🏆 Hero of the Day</h3>
+    <div class="lb-toggle">
+      <button class="active" data-board="daily" data-game="daily">Today</button>
+      <button data-board="all" data-game="daily">All-Time</button>
+    </div>
     <div class="date" id="lbDate"></div>
     <div class="lb-list" id="lbList"><div class="lb-empty">Loading…</div></div>
   </div>
@@ -444,7 +472,11 @@
     </div>
 
     <div class="leaderboard" id="sortLeaderboard">
-      <h3>🏆 Faction Sort Leaderboard</h3>
+      <h3>🏆 Faction Sort</h3>
+      <div class="lb-toggle">
+        <button class="active" data-board="daily" data-game="sort">Today</button>
+        <button data-board="all" data-game="sort">All-Time</button>
+      </div>
       <div class="date" id="sortLbDate"></div>
       <div class="lb-list" id="sortLbList"><div class="lb-empty">Loading…</div></div>
     </div>
@@ -477,7 +509,11 @@
     </div>
 
     <div class="leaderboard" id="ultLeaderboard">
-      <h3>🏆 Whose Ult? Leaderboard</h3>
+      <h3>🏆 Whose Ult?</h3>
+      <div class="lb-toggle">
+        <button class="active" data-board="daily" data-game="ult">Today</button>
+        <button data-board="all" data-game="ult">All-Time</button>
+      </div>
       <div class="date" id="ultLbDate"></div>
       <div class="lb-list" id="ultLbList"><div class="lb-empty">Loading…</div></div>
     </div>
@@ -659,7 +695,82 @@ function avatar(h){
 // if a portrait URL fails to load, swap in the letter-avatar
 function imgFallback(h){ return `this.onerror=null;this.src='${letterAvatar(h)}'`; }
 
-let target=null, guesses=[], over=false, playerName='';
+let target=null, guesses=[], over=false, playerName='', startedAt=0;
+
+// ============================================================
+//  TEAM ROSTER — the fixed list of players. Pick from this list,
+//  or choose "Other" (which forces a look at the list first).
+// ============================================================
+const TEAM_NAMES = [
+  "Adam Armstrong","CJ Galarza","Connor Yoho","David Jin","Derek Dincer",
+  "Ellie Russell","Gage Huff","Jake Marada","Jonny Throop","Kori Davis",
+  "Michael Zhang","Mike Furrh","Natasha Manger","Parker Anderson","Sean Hewitt",
+  "Stone Newberry","Thuan Ho","Xiaohu Alcocer","Zarahi Alcocer"
+].sort((a,b)=>a.localeCompare(b));
+
+// points awarded by daily finishing place (index 0 = 1st). Ties share the higher place.
+// Anyone who finishes but ranks below the list still gets 1 point for showing up.
+const PLACE_POINTS=[20,15,12,9,8,7,6,5,4,3,2];
+function pointsForPlace(place){ return place<PLACE_POINTS.length ? PLACE_POINTS[place] : 1; }
+
+// build a name-picker UI inside a name-gate card.
+//   container: the .ng-card element to populate
+//   onPick(name): called with the chosen/typed name
+function buildNamePicker(container, headline, sub, onPick){
+  container.innerHTML=`
+    <h2>${headline}</h2>
+    <p>${sub}</p>
+    <select class="name-select" aria-label="Choose your name">
+      <option value="" disabled selected>— Select your name —</option>
+      ${TEAM_NAMES.map(n=>`<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('')}
+      <option value="__other__">Other (not on the list)…</option>
+    </select>
+    <div class="other-wrap" style="display:none">
+      <p class="other-note">Not on the list? Double-check above first — then enter your name:</p>
+      <input type="text" class="other-input" placeholder="Your name" maxlength="20" autocomplete="off">
+    </div>
+    <button class="name-go">Start</button>
+    <div class="ng-err"></div>`;
+  const sel=container.querySelector('.name-select');
+  const otherWrap=container.querySelector('.other-wrap');
+  const otherInput=container.querySelector('.other-input');
+  const go=container.querySelector('.name-go');
+  const err=container.querySelector('.ng-err');
+  sel.addEventListener('change',()=>{
+    otherWrap.style.display = sel.value==='__other__' ? 'block' : 'none';
+    if(sel.value==='__other__') setTimeout(()=>otherInput.focus(),50);
+    err.textContent='';
+  });
+  function submit(){
+    let name='';
+    if(sel.value==='__other__'){
+      name=otherInput.value.trim();
+      if(!name){ err.textContent='Enter a name, or pick yours from the list above.'; return; }
+    } else if(sel.value){
+      name=sel.value;
+    } else {
+      err.textContent='Please select your name to start.'; return;
+    }
+    onPick(name);
+  }
+  go.onclick=submit;
+  otherInput.addEventListener('keydown',e=>{if(e.key==='Enter')submit();});
+}
+
+// completion timestamp helper — readable PT time like "8:42 AM"
+function fmtTime(ts){
+  try{
+    return new Intl.DateTimeFormat('en-US',{timeZone:'America/Los_Angeles',
+      hour:'numeric',minute:'2-digit',hour12:true}).format(new Date(ts));
+  }catch(e){ return ''; }
+}
+function fmtElapsed(ms){
+  if(!ms || ms<0) return '';
+  const s=Math.round(ms/1000);
+  if(s<60) return s+'s';
+  const m=Math.floor(s/60), r=s%60;
+  return r? `${m}m ${r}s` : `${m}m`;
+}
 
 // Get Y/M/D in America/Los_Angeles (auto-handles PST/PDT)
 function ptParts(){
@@ -752,7 +863,7 @@ let myEntryId=null;
 // ---- mid-game persistence (survive accidental refresh / tab close) ----
 function progressKey(){ return 'bvid_progress_'+dayKey(); }
 function saveProgress(){
-  try{ localStorage.setItem(progressKey(), JSON.stringify({name:playerName, guesses})); }catch(e){}
+  try{ localStorage.setItem(progressKey(), JSON.stringify({name:playerName, guesses, startedAt})); }catch(e){}
 }
 function clearProgress(){ try{ localStorage.removeItem(progressKey()); }catch(e){} }
 function restoreProgress(){
@@ -760,6 +871,7 @@ function restoreProgress(){
   try{ p=JSON.parse(localStorage.getItem(progressKey())||'null'); }catch(e){}
   if(!p || !p.name) return false;
   playerName=p.name;
+  startedAt=p.startedAt||Date.now();
   guesses=Array.isArray(p.guesses)?p.guesses.filter(n=>ROSTER.some(h=>h.name===n)):[];
   nameGate.style.display='none';
   playArea.classList.remove('locked');
@@ -869,7 +981,7 @@ async function submitScore(){
   myEntryId='id_'+Math.random().toString(36).slice(2,9);
   const entry={
     id:myEntryId, name:playerName.slice(0,20), turns:guesses.length,
-    ts:Date.now(), day:dayKey(), guesses:[...guesses]
+    ts:Date.now(), started:startedAt||null, day:dayKey(), guesses:[...guesses]
   };
   const status=document.getElementById('submitStatus');
   try{
@@ -932,7 +1044,7 @@ async function renderBoard(){
           <div class="nm">${escapeHtml(e.name)}</div>
           <div class="turns">${e.turns} ${e.turns===1?'turn':'turns'} <span class="caret">▶</span></div>
         </div>
-        <div class="lb-detail">${gl}</div>`;
+        <div class="lb-detail">${gl}<div class="lb-meta">${e.ts?'Solved '+fmtTime(e.ts):''}${e.started&&e.ts?' \u00b7 took '+fmtElapsed(e.ts-e.started):''}</div></div>`;
       wrap.querySelector('.lb-row').onclick=()=>wrap.classList.toggle('open');
     } else {
       // locked: show name + turns only, no caret, no expand
@@ -1028,14 +1140,10 @@ input.addEventListener('keydown',e=>{
 // ---- name gate ----
 const nameGate=document.getElementById('nameGate');
 const playArea=document.getElementById('playArea');
-const playerInput=document.getElementById('playerName');
-const startBtn=document.getElementById('startBtn');
-const ngErr=document.getElementById('ngErr');
 
-function startGame(){
-  const n=playerInput.value.trim();
-  if(!n){ ngErr.textContent='Please enter a name to start.'; return; }
+function startGame(n){
   playerName=n;
+  startedAt=Date.now();
   nameGate.style.display='none';
   playArea.classList.remove('locked');
   input.disabled=false;
@@ -1043,8 +1151,10 @@ function startGame(){
   saveProgress();
   input.focus();
 }
-startBtn.onclick=startGame;
-playerInput.addEventListener('keydown',e=>{if(e.key==='Enter')startGame();});
+buildNamePicker(nameGate.querySelector('.ng-card'),
+  "Pick your name to play",
+  "You'll be locked in for today's hero. Your guesses are recorded.",
+  startGame);
 
 function showAlreadyPlayed(){
   let prev={};
@@ -1081,7 +1191,7 @@ function factionOf(name){
 }
 const SORT_POOL = [...FACTIONS.Overwatch, ...FACTIONS.Talon, ...FACTIONS.Freelancer];
 
-let sortName='', sortDeal=[], sortOver=false, sortEntryId=null;
+let sortName='', sortDeal=[], sortOver=false, sortEntryId=null, sortStartedAt=0;
 
 // daily-seeded deal of 5 heroes (same for everyone that PT day),
 // guaranteed to include at least one hero from each faction
@@ -1161,15 +1271,16 @@ function wireZone(el){
 }
 ['sortPool','zone-ow','zone-talon','zone-free'].forEach(id=>wireZone(document.getElementById(id)));
 
-function startSort(){
-  const n=document.getElementById('sortName').value.trim();
-  if(!n){ document.getElementById('sortErr').textContent='Please enter a name to start.'; return; }
+function startSort(n){
   sortName=n;
+  sortStartedAt=Date.now();
   document.getElementById('sortGate').style.display='none';
   document.getElementById('sortArea').classList.remove('locked');
 }
-document.getElementById('sortStartBtn').onclick=startSort;
-document.getElementById('sortName').addEventListener('keydown',e=>{if(e.key==='Enter')startSort();});
+buildNamePicker(document.querySelector('#sortGate .ng-card'),
+  "Faction Sort",
+  "Sort the 5 heroes into Overwatch, Talon, or Freelancer. Pick your name to play.",
+  startSort);
 
 async function submitSort(){
   if(sortOver) return;
@@ -1218,7 +1329,7 @@ document.getElementById('sortSubmit').onclick=submitSort;
 async function submitSortScore(correct){
   sortEntryId='sid_'+Math.random().toString(36).slice(2,9);
   const entry={ id:sortEntryId, name:sortName.slice(0,20), score:correct, total:sortDeal.length,
-    ts:Date.now(), day:dayKey(), picks:sortDeal.map(n=>({name:n,side:placedSide(n)})) };
+    ts:Date.now(), started:sortStartedAt||null, day:dayKey(), picks:sortDeal.map(n=>({name:n,side:placedSide(n)})) };
   const status=document.getElementById('sortStatus');
   if(status) status.textContent='Saving your score…';
   try{
@@ -1259,10 +1370,13 @@ async function renderSortBoard(){
     const rc=i===0?'r1':i===1?'r2':i===2?'r3':'';
     const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
     const row=document.createElement('div'); row.className='lb-wrap';
-    row.innerHTML=`<div class="lb-row locked-row${e.id===sortEntryId?' me':''}">
+    const meta=`<div class="lb-meta">${e.ts?'Played '+fmtTime(e.ts):''}${e.started&&e.ts?' \u00b7 took '+fmtElapsed(e.ts-e.started):''}</div>`;
+    row.innerHTML=`<div class="lb-row${e.id===sortEntryId?' me':''}">
       <div class="rank ${rc}">${medal}</div>
       <div class="nm">${escapeHtml(e.name)}</div>
-      <div class="turns">${e.score}/${e.total||5}</div></div>`;
+      <div class="turns">${e.score}/${e.total||5} <span class="caret">▶</span></div></div>
+      <div class="lb-detail">${meta}</div>`;
+    row.querySelector('.lb-row').onclick=()=>row.classList.toggle('open');
     listEl.appendChild(row);
   });
 }
@@ -1324,7 +1438,7 @@ const ULT_LINES = {
 };
 const ULT_POOL = Object.keys(ULT_LINES).filter(n=>ULT_LINES[n].line && ROSTER.some(h=>h.name===n));
 
-let ultTarget=null, ultGuessList=[], ultOver=false, ultPlayer='', ultEntryId=null;
+let ultTarget=null, ultGuessList=[], ultOver=false, ultPlayer='', ultEntryId=null, ultStartedAt=0;
 
 // daily-seeded pick over the ult pool, reshuffled each full cycle (same pattern as hero of the day)
 function dailyUltHero(){
@@ -1342,7 +1456,7 @@ function ultPlayedKey(){ return 'bvid_ult_'+dayKey(); }
 function hasUltedToday(){ try{ return localStorage.getItem(ultPlayedKey())!==null; }catch(e){ return false; } }
 function markUlted(){ try{ localStorage.setItem(ultPlayedKey(), JSON.stringify({name:ultPlayer,turns:ultGuessList.length,ts:Date.now()})); }catch(e){} }
 function ultProgKey(){ return 'bvid_ultprog_'+dayKey(); }
-function saveUltProgress(){ try{ localStorage.setItem(ultProgKey(), JSON.stringify({name:ultPlayer,guesses:ultGuessList})); }catch(e){} }
+function saveUltProgress(){ try{ localStorage.setItem(ultProgKey(), JSON.stringify({name:ultPlayer,guesses:ultGuessList,startedAt:ultStartedAt})); }catch(e){} }
 function clearUltProgress(){ try{ localStorage.removeItem(ultProgKey()); }catch(e){} }
 
 const ultInput=document.getElementById('ultInput');
@@ -1418,7 +1532,7 @@ function ultWin(){
 async function submitUltScore(){
   ultEntryId='uid_'+Math.random().toString(36).slice(2,9);
   const entry={ id:ultEntryId, name:ultPlayer.slice(0,20), turns:ultGuessList.length,
-    ts:Date.now(), day:dayKey(), guesses:[...ultGuessList] };
+    ts:Date.now(), started:ultStartedAt||null, day:dayKey(), guesses:[...ultGuessList] };
   const status=document.getElementById('ultStatus');
   try{
     if(!db) throw new Error('Leaderboard backend not configured.');
@@ -1465,7 +1579,7 @@ async function renderUltBoard(){
           <div class="nm">${escapeHtml(e.name)}</div>
           <div class="turns">${e.turns} ${e.turns===1?'turn':'turns'} <span class="caret">▶</span></div>
         </div>
-        <div class="lb-detail">${gl}</div>`;
+        <div class="lb-detail">${gl}<div class="lb-meta">${e.ts?'Solved '+fmtTime(e.ts):''}${e.started&&e.ts?' \u00b7 took '+fmtElapsed(e.ts-e.started):''}</div></div>`;
       wrap.querySelector('.lb-row').onclick=()=>wrap.classList.toggle('open');
     } else {
       wrap.innerHTML=`
@@ -1510,10 +1624,9 @@ ultInput.addEventListener('keydown',e=>{
   }
 });
 
-function startUlt(){
-  const n=document.getElementById('ultName').value.trim();
-  if(!n){ document.getElementById('ultErr').textContent='Please enter a name to start.'; return; }
+function startUlt(n){
   ultPlayer=n;
+  ultStartedAt=Date.now();
   document.getElementById('ultGate').style.display='none';
   document.getElementById('ultQuoteCard').classList.remove('blurred');
   document.getElementById('ultArea').classList.remove('locked');
@@ -1521,8 +1634,10 @@ function startUlt(){
   saveUltProgress();
   ultInput.focus();
 }
-document.getElementById('ultStartBtn').onclick=startUlt;
-document.getElementById('ultName').addEventListener('keydown',e=>{if(e.key==='Enter')startUlt();});
+buildNamePicker(document.querySelector('#ultGate .ng-card'),
+  "Whose Ult?",
+  "One ultimate voice line, one hero. Every wrong guess unlocks a hint. Pick your name to play.",
+  startUlt);
 
 function initUlt(){
   ultTarget=dailyUltHero();
@@ -1539,6 +1654,7 @@ function initUlt(){
     let p=null; try{ p=JSON.parse(localStorage.getItem(ultProgKey())||'null'); }catch(e){}
     if(p && p.name){
       ultPlayer=p.name;
+      ultStartedAt=p.startedAt||Date.now();
       ultGuessList=Array.isArray(p.guesses)?p.guesses.filter(n=>ULT_POOL.includes(n)):[];
       document.getElementById('ultGate').style.display='none';
       document.getElementById('ultQuoteCard').classList.remove('blurred');
@@ -1549,6 +1665,94 @@ function initUlt(){
   }
   renderUltBoard().catch(e=>console.warn('ult board load failed',e));
 }
+
+// ============================================================
+//  ALL-TIME POINTS BOARD
+//  Reads every historical daily record for a game, ranks each
+//  day, awards points (PLACE_POINTS, ties share the higher place),
+//  and totals per player. Computed live — no separate tally to
+//  drift out of sync, and old records count retroactively.
+//  scoreKey: how to rank within a day. higher-is-better returns
+//  a comparable number; we sort descending by it.
+// ============================================================
+const GAME_CFG = {
+  daily: { coll:'scores',     rankVal:e=>-e.turns,  better:'low'  }, // fewest guesses
+  sort:  { coll:'sortScores', rankVal:e=>e.score,   better:'high' }, // highest score
+  ult:   { coll:'ultScores',  rankVal:e=>-e.turns,  better:'high' }  // fewest guesses
+};
+
+async function loadAllTime(game){
+  const cfg=GAME_CFG[game];
+  if(!db) return null;
+  const snap=await getDocs(collection(db,cfg.coll));
+  const all=snap.docs.map(d=>d.data());
+  // group by day
+  const byDay={};
+  all.forEach(e=>{ if(!e.day) return; (byDay[e.day]=byDay[e.day]||[]).push(e); });
+  // per person: points, wins (1st places), days played
+  const tally={};
+  Object.values(byDay).forEach(entries=>{
+    // rank within the day by rankVal (higher = better place)
+    entries.sort((a,b)=>cfg.rankVal(b)-cfg.rankVal(a));
+    let place=0, prevVal=null;
+    entries.forEach((e,i)=>{
+      const val=cfg.rankVal(e);
+      if(prevVal!==null && val!==prevVal) place=i; // ties keep same place; gaps after ties
+      prevVal=val;
+      const nm=(e.name||'???').slice(0,20);
+      const t=tally[nm]||(tally[nm]={name:nm,points:0,wins:0,days:0});
+      t.points+=pointsForPlace(place);
+      t.days+=1;
+      if(place===0) t.wins+=1;
+    });
+  });
+  return Object.values(tally).sort((a,b)=> b.points-a.points || b.wins-a.wins || a.name.localeCompare(b.name));
+}
+
+function myNameForGame(game){
+  return game==='daily'?playerName : game==='sort'?sortName : ultPlayer;
+}
+
+async function renderAllTime(game, listEl, dateEl){
+  if(dateEl) dateEl.textContent='All-Time · points across every day';
+  listEl.innerHTML='<div class="lb-empty">Loading…</div>';
+  let board=null;
+  try{ board=await loadAllTime(game); }
+  catch(err){ console.error(err); listEl.innerHTML='<div class="lb-empty">Could not load the all-time board.</div>'; return; }
+  if(!board || !board.length){ listEl.innerHTML='<div class="lb-empty">No games recorded yet.</div>'; return; }
+  const me=myNameForGame(game);
+  listEl.innerHTML='';
+  board.forEach((e,i)=>{
+    const rc=i===0?'r1':i===1?'r2':i===2?'r3':'';
+    const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
+    const row=document.createElement('div');
+    row.className='lb-allrow'+(e.name===me?' me':'');
+    row.innerHTML=`
+      <div class="rank ${rc}">${medal}</div>
+      <div class="nm">${escapeHtml(e.name)}<span class="wins">${e.wins}🏆 · ${e.days} played</span></div>
+      <div class="pts">${e.points} pts</div>`;
+    listEl.appendChild(row);
+  });
+}
+
+// ---- leaderboard Today/All-Time toggle wiring ----
+const BOARD_TARGETS={
+  daily:{ list:'lbList',    date:'lbDate',    daily:renderBoard },
+  sort: { list:'sortLbList',date:'sortLbDate',daily:renderSortBoard },
+  ult:  { list:'ultLbList', date:'ultLbDate', daily:renderUltBoard }
+};
+document.querySelectorAll('.lb-toggle').forEach(tog=>{
+  tog.querySelectorAll('button').forEach(btn=>{
+    btn.onclick=()=>{
+      const game=btn.dataset.game, board=btn.dataset.board;
+      tog.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b===btn));
+      const tgt=BOARD_TARGETS[game];
+      const listEl=document.getElementById(tgt.list), dateEl=document.getElementById(tgt.date);
+      if(board==='all'){ renderAllTime(game,listEl,dateEl); }
+      else { tgt.daily(); }
+    };
+  });
+});
 
 // ---- mode switching (Hero of the Day / Faction Guess / Whose Ult?) ----
 const modeDailyBtn=document.getElementById('modeDailyBtn');
