@@ -228,6 +228,9 @@
   .ng-card button:hover{filter:brightness(1.08)}
   .ng-err{color:#c0392b;font-size:14px;font-weight:600;margin-top:10px;min-height:18px}
   /* name picker */
+  .alltime-notice{background:rgba(255,122,0,.12);border:1px solid rgba(255,122,0,.35);
+    border-radius:10px;padding:11px 14px;margin:0 0 14px;font-size:13.5px;line-height:1.45;
+    color:var(--text-dark);text-align:left}
   .name-select{width:100%;padding:14px 16px;font-size:18px;font-family:'Rajdhani';font-weight:600;
     border:2px solid var(--accent);border-radius:10px;outline:none;color:var(--text-dark);
     margin-bottom:12px;background:#fff;cursor:pointer}
@@ -722,13 +725,14 @@ function buildNamePicker(container, headline, sub, onPick){
   container.innerHTML=`
     <h2>${headline}</h2>
     <p>${sub}</p>
+    <div class="alltime-notice">🏆 Your scores add up on the <b>all-time leaderboard</b> by name. Pick the same name each day so your points stack on one entry.</div>
     <select class="name-select" aria-label="Choose your name">
       <option value="" disabled selected>— Select your name —</option>
       ${TEAM_NAMES.map(n=>`<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('')}
       <option value="__other__">Other (not on the list)…</option>
     </select>
     <div class="other-wrap" style="display:none">
-      <p class="other-note">Not on the list? Double-check above first — then enter your name:</p>
+      <p class="other-note">⚠️ Not on the list? Double-check above first — and type your name <b>exactly the same way every day</b>, or your points will split across spellings.</p>
       <input type="text" class="other-input" placeholder="Your name" maxlength="20" autocomplete="off">
     </div>
     <button class="name-go">Start</button>
