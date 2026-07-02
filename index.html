@@ -3,279 +3,1062 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Blizzard Video · Games</title>
+<title>BVID WoW · Daily Games</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Rajdhani:wght@500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Rajdhani:wght@500;600;700&display=swap');
 
   :root{
-    --bg-1:#10162b; --bg-2:#070b18;
-    --panel:rgba(232,236,244,0.94);
-    --text-light:#f4f7ff; --text-dim:#aeb6cc;
-    --radius:18px;
-    /* active IP accent — overwritten on hover */
-    --accent:#5d6b9a; --accent-soft:rgba(93,107,154,0.18);
+    --bg-1:#11261c; --bg-2:#07120d;
+    --panel:rgba(236,240,232,0.94);
+    --panel-dark:rgba(18,34,26,0.82);
+    --accent:#3fb56a; --accent-2:#d9b84a;
+    --alliance:#2f6ad6; --horde:#b8232a; --neutral:#caa14a;
+    --correct:#1f7a3d; --correct-d:#155c2c;
+    --close:#a8821f;
+    --wrong:#8a1f24; --wrong-d:#6a161a;
+    --text-dark:#16261c; --text-light:#f3f7ef;
+    --radius:14px;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-behavior:smooth}
   body{
     font-family:'Rajdhani',sans-serif;color:var(--text-light);min-height:100vh;
     background:
-      radial-gradient(1100px 620px at 72% 8%, var(--accent-soft), transparent 60%),
-      radial-gradient(900px 520px at 15% 95%, var(--accent-soft), transparent 60%),
-      linear-gradient(165deg,var(--bg-1),var(--bg-2));
+      radial-gradient(1200px 600px at 70% 20%, rgba(217,184,74,0.16), transparent 60%),
+      radial-gradient(900px 500px at 20% 80%, rgba(63,181,106,0.16), transparent 60%),
+      linear-gradient(160deg,var(--bg-1),var(--bg-2));
     background-attachment:fixed;
-    transition:background .5s ease;
-    overflow-x:hidden;
   }
   body::before{
-    content:"";position:fixed;inset:0;pointer-events:none;opacity:.04;
+    content:""; position:fixed; inset:0; pointer-events:none; opacity:.05;
     background-image:repeating-linear-gradient(0deg,#fff 0 1px,transparent 1px 4px);
   }
-  a{color:inherit;text-decoration:none}
-  .wrap{max-width:1080px;margin:0 auto;padding:40px 22px 70px}
+  .wrap{max-width:880px;margin:0 auto;padding:22px 16px 60px}
+  button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent-2);outline-offset:2px}
 
-  /* ---------- masthead ---------- */
-  header{text-align:center;margin:28px 0 14px;animation:rise .7s ease both}
-  .brand-mark{
-    display:inline-block;font-family:'Orbitron';font-weight:800;font-size:13px;letter-spacing:6px;
-    color:var(--text-dim);border:1px solid rgba(255,255,255,.16);border-radius:999px;
-    padding:8px 22px 8px 24px;margin-bottom:24px;text-transform:uppercase;
+  /* nav */
+  nav{
+    background:var(--panel); color:var(--text-dark);
+    border-radius:var(--radius); padding:18px 26px;
+    display:flex;align-items:center;gap:28px;flex-wrap:wrap;
+    box-shadow:0 10px 40px rgba(0,0,0,.45);
   }
-  h1{
-    font-family:'Orbitron';font-weight:800;letter-spacing:1px;line-height:.98;
-    font-size:clamp(42px,8vw,90px);
+  nav .logo{
+    flex-shrink:0; padding:10px 16px; border-radius:12px;
+    background:linear-gradient(135deg,var(--accent),#5fd68a);
+    color:#0d1f15; font-family:'Cinzel'; font-weight:800; font-size:24px;
+    letter-spacing:1px; box-shadow:0 4px 14px rgba(63,181,106,.5); text-decoration:none;
   }
-  h1 .vid{
-    background:linear-gradient(120deg,#8fb4ff,#d4dfff 60%,#fff);
-    -webkit-background-clip:text;background-clip:text;color:transparent;
-  }
-  .tagline{margin:20px auto 0;max-width:560px;font-size:19px;color:var(--text-dim);line-height:1.55}
+  nav .links{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+  nav .title{font-family:'Cinzel';font-weight:800;font-size:21px;letter-spacing:.5px;color:var(--text-dark)}
+  nav .puzzlenum{margin-left:auto;font-family:'Cinzel';font-weight:600;font-size:13px;
+    opacity:.55;letter-spacing:1px}
 
-  /* divider eyebrow */
-  .eyebrow{
-    display:flex;align-items:center;gap:16px;margin:54px 0 26px;
-    font-family:'Orbitron';font-weight:700;font-size:13px;letter-spacing:3px;
-    color:var(--text-dim);text-transform:uppercase;
+  /* mode buttons */
+  .modes{display:flex;gap:10px;justify-content:center;margin:24px 0;flex-wrap:wrap}
+  .mode-btn{
+    background:var(--panel);color:var(--text-dark);
+    border:none;border-radius:var(--radius);padding:13px 22px;
+    font-family:'Cinzel';font-weight:700;font-size:15px;cursor:pointer;
+    display:flex;align-items:center;gap:9px;transition:.15s;
+    box-shadow:0 8px 26px rgba(0,0,0,.4);
   }
-  .eyebrow::before,.eyebrow::after{content:"";height:1px;flex:1;background:rgba(255,255,255,.14)}
+  .mode-btn .ic{font-size:20px}
+  .mode-btn.active{outline:3px solid var(--accent);transform:translateY(-2px)}
+  .mode-btn:not(.active){opacity:.74}
+  .mode-btn:hover:not(.active){opacity:.92;transform:translateY(-1px)}
+  .mode-btn .done{color:var(--correct);font-weight:800;font-size:16px;margin-left:2px}
+  .choice.done{cursor:default}
 
-  /* ---------- IP grid ---------- */
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:22px}
-  .card{
-    position:relative;display:flex;flex-direction:column;border-radius:var(--radius);overflow:hidden;
-    background:linear-gradient(158deg,rgba(255,255,255,.08),rgba(255,255,255,.015));
-    border:1px solid rgba(255,255,255,.10);
-    padding:28px 26px 24px;min-height:248px;
-    transition:transform .24s cubic-bezier(.2,.8,.3,1), border-color .24s, box-shadow .24s;
-    animation:rise .6s ease both;
-  }
-  /* glow that washes up from the card's accent color */
-  .card::after{
-    content:"";position:absolute;left:0;right:0;bottom:0;height:55%;pointer-events:none;
-    background:radial-gradient(120% 90% at 50% 130%, color-mix(in srgb,var(--c) 26%,transparent), transparent 70%);
-    opacity:.5;transition:opacity .25s;
-  }
-  /* logo slot — now the hero of the card, top-centered */
-  .card .logo-slot{
-    position:relative;z-index:1;width:84px;height:84px;border-radius:20px;margin-bottom:18px;
-    display:grid;place-items:center;overflow:hidden;
-    background:color-mix(in srgb, var(--c) 18%, transparent);
-    border:1px solid color-mix(in srgb, var(--c) 40%, transparent);
-    transition:transform .24s, background .24s, border-color .24s;
-  }
-  .card .logo-slot img{width:100%;height:100%;object-fit:contain;padding:10px}
-  .card .logo-slot .ph{
-    font-family:'Orbitron';font-weight:800;font-size:26px;
-    color:color-mix(in srgb, var(--c) 78%, #fff);
-  }
-  .card h2{position:relative;z-index:1;font-family:'Orbitron';font-weight:800;font-size:25px;
-    margin:0 0 9px;line-height:1.08}
-  .card .blurb{position:relative;z-index:1;font-size:15.5px;color:var(--text-dim);line-height:1.5}
-  .card .accentbar{
-    position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c);
-    transform:scaleY(.35);transform-origin:top;transition:transform .25s;opacity:.9;
-  }
-  .card .footrow{position:relative;z-index:1;margin-top:auto;padding-top:18px;
-    display:flex;align-items:center;justify-content:space-between;gap:10px}
-  .card .cta{
-    display:inline-flex;align-items:center;gap:9px;
-    font-family:'Orbitron';font-weight:700;font-size:14px;letter-spacing:1px;color:var(--c);
-  }
-  .card .cta .arr{transition:transform .2s}
+  /* name picker */
+  .namegate{max-width:480px;margin:0 auto 4px}
+  .ng-card{background:var(--panel);color:var(--text-dark);border-radius:var(--radius);
+    padding:26px 28px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+  .ng-card h2{font-family:'Cinzel';font-size:22px;margin-bottom:6px}
+  .ng-card p{font-size:15px;opacity:.75;margin-bottom:16px}
+  .alltime-notice{background:rgba(63,181,106,.14);border:1px solid rgba(63,181,106,.4);
+    border-radius:10px;padding:11px 14px;margin:0 0 14px;font-size:13.5px;line-height:1.45;
+    color:var(--text-dark);text-align:left}
+  .name-select{width:100%;padding:14px 16px;font-size:18px;font-family:'Rajdhani';font-weight:600;
+    border:2px solid var(--accent);border-radius:10px;outline:none;color:var(--text-dark);
+    margin-bottom:12px;background:#fff;cursor:pointer}
+  .other-wrap{margin-bottom:12px;text-align:left}
+  .other-note{font-size:13px;opacity:.7;margin:0 0 8px;line-height:1.4}
+  .other-input{width:100%;padding:14px 16px;font-size:18px;font-family:'Rajdhani';font-weight:600;
+    border:2px solid var(--accent);border-radius:10px;outline:none;color:var(--text-dark)}
+  .ng-card .name-go{width:100%;background:var(--accent);color:#0d1f15;border:none;padding:14px;
+    border-radius:10px;font-family:'Cinzel';font-weight:700;font-size:16px;cursor:pointer;transition:.15s}
+  .ng-card .name-go:hover{filter:brightness(1.08)}
+  .ng-err{color:#c0392b;font-size:14px;font-weight:600;margin-top:10px;min-height:18px}
+  .playarea.locked{opacity:.35;pointer-events:none;filter:grayscale(.4)}
 
-  /* live cards */
-  .card.live{cursor:pointer}
-  .card.live:hover{
-    transform:translateY(-7px);
-    border-color:color-mix(in srgb, var(--c) 55%, transparent);
-    box-shadow:0 22px 55px rgba(0,0,0,.55), 0 0 0 1px color-mix(in srgb,var(--c) 30%,transparent);
-  }
-  .card.live:hover::after{opacity:.85}
-  .card.live:hover .accentbar{transform:scaleY(1)}
-  .card.live:hover .cta .arr{transform:translateX(5px)}
-  .card.live:hover .logo-slot{
-    transform:translateY(-2px) scale(1.04);
-    background:color-mix(in srgb, var(--c) 28%, transparent);
-    border-color:color-mix(in srgb, var(--c) 62%, transparent);
-  }
-  .badge{
-    display:inline-block;font-family:'Orbitron';font-weight:700;font-size:11px;letter-spacing:1.5px;
-    padding:5px 12px;border-radius:999px;text-transform:uppercase;
-  }
-  .badge.play{background:color-mix(in srgb,var(--c) 30%,transparent);
-    color:#fff;border:1px solid color-mix(in srgb,var(--c) 58%,transparent)}
+  /* mystery card (character of the day) */
+  .mystery{width:210px;margin:0 auto;background:#fff;border-radius:10px;overflow:hidden;
+    box-shadow:0 10px 30px rgba(0,0,0,.45)}
+  .mystery .face{background:#cfe6d6;height:200px;display:grid;place-items:center}
+  .mystery .face .q{font-size:120px;color:#2b4538;font-family:'Cinzel';font-weight:800;line-height:1;
+    animation:pulse 2.6s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+  .mystery .face img{width:100%;height:100%;object-fit:cover}
+  .mystery.solved{animation:glowpulse 1.4s ease-in-out 3}
+  .mystery.solved .face img{animation:revealin .65s cubic-bezier(.2,.9,.3,1.2) both}
+  .mystery.solved .label{color:var(--correct)}
+  .mystery .label{color:var(--text-dark);text-align:center;font-weight:700;font-size:20px;
+    padding:14px;font-family:'Cinzel'}
+  @keyframes revealin{from{transform:scale(.35) rotate(-10deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
+  @keyframes glowpulse{0%,100%{box-shadow:0 8px 26px rgba(0,0,0,.35)}
+    50%{box-shadow:0 0 34px 8px rgba(217,184,74,.6)}}
+  .countdown{text-align:center;margin:12px 0 0;font-family:'Cinzel';font-weight:600;
+    font-size:13px;letter-spacing:1.5px;opacity:.7}
 
-  /* locked cards */
-  .card.locked{opacity:.62;filter:saturate(.55)}
-  .card.locked::after{opacity:.28}
-  .card.locked .blurb{opacity:.9}
-  .badge.soon{background:rgba(255,255,255,.06);color:var(--text-dim);
-    border:1px solid rgba(255,255,255,.14)}
-  .card.locked .logo-slot{opacity:.82}
-  .card.locked .lockico{font-size:16px;opacity:.5}
-  .card.locked:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.2)}
+  /* guess input */
+  .guessbox{position:relative;margin:22px auto 0;max-width:680px}
+  .guessbox input{width:100%;padding:18px 56px 18px 22px;font-size:20px;font-family:'Rajdhani';font-weight:600;
+    border-radius:12px;border:3px solid var(--accent);outline:none;
+    background:rgba(255,255,255,.96);color:var(--text-dark);box-shadow:0 8px 26px rgba(0,0,0,.35)}
+  .guessbox input:disabled{border-color:#888;opacity:.7}
+  .dropdown-toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);
+    width:38px;height:38px;border:none;border-radius:8px;cursor:pointer;
+    background:var(--accent);color:#0d1f15;font-size:20px;line-height:1;display:grid;place-items:center;transition:.15s;z-index:5}
+  .dropdown-toggle:hover{filter:brightness(1.08)}
+  .dropdown-toggle:disabled{background:#888;cursor:not-allowed;opacity:.7}
+  .dropdown-toggle.open{transform:translateY(-50%) rotate(180deg)}
+  .all-panel{display:none;position:relative;margin-top:8px;z-index:40;
+    background:#fff;border-radius:12px;box-shadow:0 12px 36px rgba(0,0,0,.45);
+    max-height:340px;overflow-y:auto;padding:12px;
+    grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:10px}
+  .all-panel.open{display:grid}
+  .all-panel .opt{background:#fff;border:2px solid #dde6dd;border-radius:8px;cursor:pointer;overflow:hidden;transition:.12s}
+  .all-panel .opt:hover{border-color:var(--accent);transform:translateY(-3px)}
+  .all-panel .opt.guessed{opacity:.35;pointer-events:none;filter:grayscale(.7)}
+  .all-panel .opt .pf{height:100px;width:100%;object-fit:cover;display:block}
+  .all-panel .opt .nm{color:var(--text-dark);font-weight:700;text-align:center;padding:6px 4px;font-size:15px}
+  .ac{position:absolute;left:0;right:0;top:calc(100% + 8px);z-index:30;
+    display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+  .ac .opt{background:#fff;border:2px solid #dde6dd;border-radius:8px;width:140px;cursor:pointer;
+    overflow:hidden;transition:.12s;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+  .ac .opt:hover,.ac .opt.kb{border-color:var(--accent);transform:translateY(-3px)}
+  .ac .opt .pf{height:116px;width:100%;object-fit:cover;display:block}
+  .ac .opt .nm{color:var(--text-dark);font-weight:700;text-align:center;padding:8px 4px;font-size:16px}
 
-  footer{margin-top:60px;text-align:center;color:var(--text-dim);font-size:13px;
-    font-family:'Orbitron';letter-spacing:1px;opacity:.7;line-height:2}
-  footer .small{font-family:'Rajdhani';letter-spacing:0;font-size:13px;opacity:.8;text-transform:none}
+  .hint{text-align:center;margin:20px 0;font-size:20px;font-weight:600;line-height:1.5;text-shadow:0 2px 8px rgba(0,0,0,.6)}
 
-  @keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
-  .card:nth-child(1){animation-delay:.05s}
-  .card:nth-child(2){animation-delay:.12s}
-  .card:nth-child(3){animation-delay:.19s}
-  .card:nth-child(4){animation-delay:.26s}
-  .card:nth-child(5){animation-delay:.33s}
+  /* attribute table */
+  .rules{display:flex;align-items:center;gap:12px;justify-content:center;margin:26px 0 6px;
+    font-family:'Cinzel';font-weight:700;font-size:16px;flex-wrap:wrap}
+  .pill{padding:6px 16px;border-radius:8px;font-size:14px;font-family:'Rajdhani';font-weight:700}
+  .pill.c{background:var(--correct)}.pill.w{background:var(--wrong)}.pill.cl{background:var(--close)}
+  .rules-note{text-align:center;font-size:14px;opacity:.65;margin-bottom:14px;line-height:1.6}
+  .gcount{margin-left:6px;font-size:15px;opacity:.8}
+  .gscroll{overflow-x:auto;padding-bottom:6px}
+  .gtable{max-width:820px;margin:0 auto;display:flex;flex-direction:column;gap:8px;min-width:620px}
+  .ghead,.grow{display:grid;grid-template-columns:1.3fr repeat(5,1fr);gap:6px}
+  .ghead{background:var(--panel-dark);border-radius:10px;padding:4px}
+  .ghead div{text-align:center;font-weight:700;font-family:'Cinzel';font-size:13px;padding:10px 2px;color:var(--text-light)}
+  .grow .cell{border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:3px;padding:10px 4px;font-weight:700;font-size:15px;min-height:78px;text-align:center;animation:flip .5s ease both}
+  .grow .cell.name{background:#fff;color:var(--text-dark);font-family:'Cinzel';font-size:13px}
+  .grow .cell.name img{width:60px;height:60px;border-radius:8px;object-fit:cover}
+  .cell.correct{background:var(--correct)}
+  .cell.close{background:var(--close)}
+  .cell.wrong{background:var(--wrong)}
+  .cell .ar{font-size:13px;opacity:.9}
+  @keyframes flip{from{transform:rotateX(90deg);opacity:0}to{transform:rotateX(0);opacity:1}}
+  .grow .cell:nth-child(2){animation-delay:.06s}.grow .cell:nth-child(3){animation-delay:.12s}
+  .grow .cell:nth-child(4){animation-delay:.18s}.grow .cell:nth-child(5){animation-delay:.24s}
+  .grow .cell:nth-child(6){animation-delay:.30s}
 
-  :focus-visible{outline:3px solid #7fa8ff;outline-offset:3px}
+  .win{text-align:center;margin:24px auto;max-width:520px;background:var(--panel);color:var(--text-dark);
+    border-radius:var(--radius);padding:24px;box-shadow:0 10px 30px rgba(0,0,0,.4);animation:flip .5s both}
+  .win h2{font-family:'Cinzel';color:var(--correct);font-size:26px;margin-bottom:6px}
+  .win p{font-size:18px;margin-bottom:14px}
+  .win .stats{display:flex;gap:26px;justify-content:center;margin:4px 0 16px;
+    font-family:'Cinzel';font-size:12px;letter-spacing:.5px;text-transform:uppercase;opacity:.85}
+  .win .stats b{display:block;font-size:24px;letter-spacing:0}
+  .win button{background:var(--accent);color:#0d1f15;border:none;padding:12px 28px;border-radius:10px;
+    font-family:'Cinzel';font-weight:700;font-size:16px;cursor:pointer;transition:.15s}
+  .win button:hover{filter:brightness(1.08)}
+  .win .share-btn{background:var(--accent-2)}
 
-  @media (max-width:560px){
-    .wrap{padding:28px 16px 50px}
-    .grid{grid-template-columns:1fr}
-    .card{min-height:auto}
+  /* confetti */
+  .confetti{position:fixed;top:-16px;width:10px;height:14px;z-index:999;pointer-events:none;border-radius:2px;animation:fall linear forwards}
+  @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+
+  /* multiple choice (who's that / what race / what city) */
+  .quiz-img{width:340px;max-width:90%;margin:8px auto 0;border-radius:14px;overflow:hidden;
+    background:var(--panel-dark);box-shadow:0 10px 30px rgba(0,0,0,.45);aspect-ratio:4/3;display:grid;place-items:center;position:relative}
+  .quiz-img.blurred::after{content:'🔒';position:absolute;inset:0;display:grid;place-items:center;
+    font-size:44px;background:rgba(7,18,13,.35);pointer-events:none}
+  .quiz-img img{width:100%;height:100%;object-fit:cover;display:block}
+  .quiz-img .ph{font-family:'Cinzel';font-weight:800;font-size:20px;opacity:.5;padding:20px;text-align:center}
+  .quiz-img.blurred img{filter:blur(14px)}
+  .choices{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:560px;margin:22px auto 0}
+  .choice{background:var(--panel);color:var(--text-dark);border:3px solid transparent;border-radius:12px;
+    padding:18px 14px;font-family:'Cinzel';font-weight:700;font-size:18px;cursor:pointer;transition:.15s;
+    box-shadow:0 6px 20px rgba(0,0,0,.35)}
+  .choice:hover:not(.done){transform:translateY(-3px);filter:brightness(1.04)}
+  .choice.correct{border-color:var(--correct);background:rgba(31,122,61,.16);animation:popin .5s both}
+  .choice.wrong{border-color:var(--wrong);background:rgba(138,31,36,.16);animation:shake .45s both}
+  .choice.dim{opacity:.5}
+  @keyframes popin{0%{transform:scale(1)}45%{transform:scale(1.06)}100%{transform:scale(1)}}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
+  .quiz-result{text-align:center;margin:20px auto;max-width:520px;font-size:22px;font-weight:700;
+    font-family:'Cinzel';text-shadow:0 2px 8px rgba(0,0,0,.6)}
+  @media(max-width:560px){.choices{grid-template-columns:1fr}}
+
+  /* faction sort */
+  .sortarea.locked{opacity:.35;pointer-events:none;filter:grayscale(.4)}
+  .sort-pool{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;min-height:120px;
+    margin:8px auto 22px;padding:14px;border-radius:var(--radius);background:var(--panel-dark);max-width:680px}
+  .sort-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:680px;margin:0 auto}
+  .sort-col{background:var(--panel);border-radius:var(--radius);padding:14px;box-shadow:0 8px 26px rgba(0,0,0,.35)}
+  .sort-col h4{text-align:center;font-family:'Cinzel';color:var(--text-dark);font-size:20px;margin-bottom:12px}
+  .sort-col h4 .col-ic{font-size:24px;vertical-align:-3px;margin-right:6px}
+  .sort-col[data-side="Alliance"] h4{color:var(--alliance)}
+  .sort-col[data-side="Horde"] h4{color:var(--horde)}
+  .dropzone{min-height:240px;border:2px dashed rgba(22,38,28,.25);border-radius:10px;padding:10px;
+    display:flex;flex-direction:column;gap:10px;transition:.15s}
+  .dropzone.dragover{border-color:var(--accent);background:rgba(63,181,106,.08)}
+  .htoken{display:flex;align-items:center;gap:12px;background:#fff;border:2px solid #dde6dd;border-radius:12px;
+    padding:10px 14px;cursor:grab;user-select:none;color:var(--text-dark);font-weight:700;font-size:18px;
+    box-shadow:0 3px 10px rgba(0,0,0,.2);transition:.12s}
+  .htoken:active{cursor:grabbing}
+  .htoken.dragging{opacity:.4}
+  .htoken img{width:64px;height:64px;border-radius:8px;object-fit:cover}
+  .htoken .ph{width:64px;height:64px;border-radius:8px;display:grid;place-items:center;
+    background:var(--panel-dark);color:#fff;font-family:'Cinzel';font-weight:800;font-size:22px;flex-shrink:0}
+  .htoken.correct{border-color:var(--correct);background:rgba(31,122,61,.12);animation:popin .5s both}
+  .htoken.wrong{border-color:var(--wrong);background:rgba(138,31,36,.12);animation:shake .45s both}
+  .htoken .verdict{margin-left:auto;font-weight:800;font-size:22px}
+  .htoken.correct .verdict{color:var(--correct)}.htoken.wrong .verdict{color:var(--wrong)}
+  .sort-col.celebrate{animation:glowpulse 1.4s ease-in-out 3}
+  .sort-submit{background:var(--accent);color:#0d1f15;border:none;padding:14px 40px;border-radius:12px;
+    font-family:'Cinzel';font-weight:700;font-size:17px;cursor:pointer;box-shadow:0 8px 26px rgba(0,0,0,.4);transition:.15s}
+  .sort-submit:hover{filter:brightness(1.08)}
+  .sort-submit:disabled{opacity:.5;cursor:not-allowed}
+  .sort-result{text-align:center;margin:18px auto;max-width:520px;font-size:24px;font-weight:700;
+    font-family:'Cinzel';text-shadow:0 2px 8px rgba(0,0,0,.6)}
+  .sort-result.show{animation:resultpop .55s cubic-bezier(.2,.9,.3,1.25) both}
+  .sort-share{display:block;margin:4px auto 0;background:var(--accent-2);color:#0d1f15;border:none;
+    padding:12px 28px;border-radius:10px;font-family:'Cinzel';font-weight:700;font-size:15px;cursor:pointer;transition:.15s}
+  .sort-share:hover{filter:brightness(1.08)}
+  @keyframes resultpop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+  @media(max-width:560px){.sort-cols{grid-template-columns:1fr}}
+
+  /* leaderboard */
+  .leaderboard{max-width:520px;margin:22px auto;background:var(--panel);color:var(--text-dark);
+    border-radius:var(--radius);padding:20px 24px;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+  .leaderboard h3{font-family:'Cinzel';font-size:20px;margin-bottom:4px;text-align:center}
+  .leaderboard .date{text-align:center;font-size:13px;opacity:.6;margin-bottom:14px}
+  .lb-toggle{display:flex;gap:8px;justify-content:center;margin-bottom:14px}
+  .lb-toggle button{background:rgba(22,38,28,.08);color:var(--text-dark);border:none;padding:8px 20px;
+    border-radius:8px;font-family:'Cinzel';font-weight:700;font-size:13px;cursor:pointer;transition:.15s;opacity:.6}
+  .lb-toggle button.active{background:var(--accent);color:#0d1f15;opacity:1}
+  .lb-list{display:flex;flex-direction:column;gap:6px}
+  .lb-row{display:grid;grid-template-columns:36px 1fr auto;align-items:center;gap:10px;padding:9px 14px;
+    border-radius:8px;background:rgba(22,38,28,.06);font-weight:600;font-size:16px;cursor:pointer}
+  .lb-row.locked-row{cursor:default}
+  .lb-row.me{background:rgba(63,181,106,.2);outline:2px solid var(--accent)}
+  .lb-row .rank{font-family:'Cinzel';font-weight:800;text-align:center}
+  .lb-row .rank.r1{color:#d4a017}.lb-row .rank.r2{color:#9aa0b8}.lb-row .rank.r3{color:#b06a3a}
+  .lb-row .turns{font-family:'Cinzel';font-size:14px;opacity:.8}
+  .lb-row .caret{font-size:13px;opacity:.5;transition:transform .2s}
+  .lb-wrap.open .caret{transform:rotate(90deg)}
+  .lb-detail{display:none;background:rgba(22,38,28,.05);border-radius:8px;padding:10px 14px;margin:2px 0 6px;font-size:14px}
+  .lb-wrap.open .lb-detail{display:block}
+  .lb-detail .gline{display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid rgba(0,0,0,.06)}
+  .lb-detail .gline:last-child{border-bottom:none}
+  .lb-detail .gnum{font-family:'Cinzel';font-weight:700;font-size:12px;width:20px;opacity:.6}
+  .lb-detail .gmark{margin-left:auto;font-weight:700}
+  .lb-detail .gmark.hit{color:var(--correct)}.lb-detail .gmark.miss{color:var(--wrong)}
+  .lb-meta{font-size:11px;opacity:.55;font-family:'Cinzel';letter-spacing:.5px;text-align:center;margin-top:10px;line-height:1.6}
+  .lb-allrow{display:grid;grid-template-columns:36px 1fr auto;align-items:center;gap:10px;padding:10px 14px;
+    border-radius:8px;background:rgba(22,38,28,.06);font-weight:600;font-size:16px}
+  .lb-allrow.me{background:rgba(63,181,106,.2);outline:2px solid var(--accent)}
+  .lb-allrow .rank{font-family:'Cinzel';font-weight:800;text-align:center}
+  .lb-allrow .rank.r1{color:#d4a017}.lb-allrow .rank.r2{color:#9aa0b8}.lb-allrow .rank.r3{color:#b06a3a}
+  .lb-allrow .pts{font-family:'Cinzel';font-weight:800;font-size:15px;color:var(--accent)}
+  .lb-allrow .wins{display:block;font-family:'Cinzel';font-size:11px;opacity:.65;margin-top:3px;letter-spacing:.3px}
+  .lb-empty{text-align:center;opacity:.6;padding:14px}
+  /* podium treatment for top 3 + pulse to find yourself */
+  .lb-row:has(.rank.r1),.lb-allrow:has(.rank.r1){background:rgba(212,160,23,.16)}
+  .lb-row:has(.rank.r2),.lb-allrow:has(.rank.r2){background:rgba(154,160,184,.16)}
+  .lb-row:has(.rank.r3),.lb-allrow:has(.rank.r3){background:rgba(176,106,58,.16)}
+  .lb-row:has(.rank.r1) .nm,.lb-allrow:has(.rank.r1) .nm{font-weight:800}
+  .lb-row.me,.lb-allrow.me{animation:mepulse 1.2s ease-out 1}
+  @keyframes mepulse{0%{transform:scale(1)}30%{transform:scale(1.025)}100%{transform:scale(1)}}
+
+  .footer{text-align:center;margin-top:40px;opacity:.6;font-size:14px;font-family:'Cinzel'}
+
+  @media(max-width:720px){
+    .modes{gap:8px}
+    .mode-btn{padding:10px 14px;font-size:12.5px;gap:6px}
+    .mode-btn .ic{font-size:16px}
   }
-  @media (prefers-reduced-motion:reduce){
-    *,*::before,*::after{animation:none!important;transition:none!important}
+  @media(max-width:640px){
+    nav{gap:14px;padding:14px 18px}
+    nav .title{font-size:16px}
+    nav .puzzlenum{display:none}
+    .ghead div{font-size:11px}
+    .grow .cell{font-size:12px;min-height:62px}
+    .grow .cell.name img{width:44px;height:44px}
+    .htoken{font-size:16px}.htoken img,.htoken .ph{width:52px;height:52px}
   }
+  @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <span class="brand-mark">Blizzard Video</span>
-      <h1>Daily <span class="vid">Games</span></h1>
-      <p class="tagline">One puzzle per game, per day. Pick a Blizzard universe and test what you really know, then see where you land on the leaderboard!</p>
-    </header>
+<div class="wrap">
+  <nav>
+    <a href="../index.html" class="logo" title="Back to Blizzard Video Games">BVID</a>
+    <div class="links"><span class="title">WoW · Daily Games</span></div>
+    <div class="puzzlenum" id="puzzleNum"></div>
+  </nav>
 
-    <div class="eyebrow">Choose your universe</div>
-
-    <div class="grid" id="grid">
-      <!-- LIVE: Overwatch -->
-      <a class="card live" style="--c:#ff7a00" href="Overwatch/index.html"
-         onmouseenter="lightUp('#ff7a00')" onmouseleave="resetBg()">
-        <span class="accentbar"></span>
-        <div class="logo-slot"><span class="ph">OW</span></div>
-        <h2>Overwatch</h2>
-        <p class="blurb">Hero of the Day, Faction Sort, and Whose Ult? — three daily puzzles.</p>
-        <div class="footrow">
-          <span class="badge play">▶ 3 games live</span>
-          <span class="cta">Enter <span class="arr">→</span></span>
-        </div>
-      </a>
-
-      <!-- LIVE: World of Warcraft -->
-      <a class="card live" style="--c:#3fb56a" href="wow/index.html"
-         onmouseenter="lightUp('#3fb56a')" onmouseleave="resetBg()">
-        <span class="accentbar"></span>
-        <div class="logo-slot"><span class="ph">WoW</span></div>
-        <h2>World of Warcraft</h2>
-        <p class="blurb">Character of the Day, Who's That Character, faction sort, and more — five daily puzzles.</p>
-        <div class="footrow">
-          <span class="badge play">▶ 5 games live</span>
-          <span class="cta">Enter <span class="arr">→</span></span>
-        </div>
-      </a>
-
-      <!-- LOCKED: Heroes of the Storm -->
-      <div class="card locked" style="--c:#8a5cff">
-        <span class="accentbar"></span>
-        <div class="logo-slot"><span class="ph">HotS</span></div>
-        <h2>Heroes of the Storm</h2>
-        <p class="blurb">Every Blizzard universe collides. Guess the Nexus roster.</p>
-        <div class="footrow">
-          <span class="badge soon">Coming soon</span>
-          <span class="lockico">🔒</span>
-        </div>
-      </div>
-
-      <!-- LOCKED: StarCraft -->
-      <div class="card locked" style="--c:#2bb6d6">
-        <span class="accentbar"></span>
-        <div class="logo-slot"><span class="ph">SC</span></div>
-        <h2>StarCraft</h2>
-        <p class="blurb">Terran, Zerg, or Protoss? Sort units and name the heroes.</p>
-        <div class="footrow">
-          <span class="badge soon">Coming soon</span>
-          <span class="lockico">🔒</span>
-        </div>
-      </div>
-
-      <!-- LOCKED: Diablo -->
-      <div class="card locked" style="--c:#c5392f">
-        <span class="accentbar"></span>
-        <div class="logo-slot"><span class="ph">D</span></div>
-        <h2>Diablo</h2>
-        <p class="blurb">Sanctuary's classes and the Burning Hells' worst. Coming from the depths.</p>
-        <div class="footrow">
-          <span class="badge soon">Coming soon</span>
-          <span class="lockico">🔒</span>
-        </div>
-      </div>
-    </div>
-
-    <footer>
-      BLIZZARD VIDEO · GAMES HUB · v1.0
-      <div class="small">An unofficial project for the Blizzard Video Team</div>
-    </footer>
+  <div class="modes">
+    <button class="mode-btn active" data-mode="char"><span class="ic">⚔️</span>Character of the Day</button>
+    <button class="mode-btn" data-mode="who"><span class="ic">❓</span>Who's That Character?</button>
+    <button class="mode-btn" data-mode="faction"><span class="ic">🛡️</span>Which Faction?</button>
+    <button class="mode-btn" data-mode="race"><span class="ic">🧬</span>What Race?</button>
+    <button class="mode-btn" data-mode="city"><span class="ic">🏰</span>What City?</button>
   </div>
 
-<script>
-  // ============================================================
-  //  IP LOGOS — paste each game's logo URL between the quotes.
-  //  Leave any blank ("") to keep the text placeholder (OW, WoW…).
-  //  Example: "World of Warcraft": "https://your-image-url/wow.png"
-  // ============================================================
-  const LOGOS = {
-    "Overwatch":          "",
-    "World of Warcraft":  "",
-    "Heroes of the Storm":"",
-    "StarCraft":          "",
-    "Diablo":             ""
-  };
+  <!-- ===================== CHARACTER OF THE DAY ===================== -->
+  <div id="view-char">
+    <div class="namegate" id="charGate"><div class="ng-card"></div></div>
+    <div class="mystery"><div class="face"><div class="q" id="charFace">?</div></div><div class="label" id="charLabel">???</div></div>
+    <div class="countdown" id="charCountdown"></div>
+    <div class="playarea locked" id="charArea">
+      <div class="guessbox">
+        <input type="text" id="charInput" placeholder="Guess a character..." autocomplete="off" disabled aria-label="Guess a character">
+        <button class="dropdown-toggle" id="charToggle" title="Browse all characters" disabled aria-label="Browse all characters">▾</button>
+        <div class="ac" id="charAc"></div>
+        <div class="all-panel" id="charPanel"></div>
+      </div>
+      <div class="hint" id="charHint">Take your first guess to get clues.<br>Or tap the ▾ to browse all characters.</div>
+      <div id="charRules" style="display:none">
+        <div class="rules">Clues: <span class="pill c">Match</span><span class="pill cl">Close</span><span class="pill w">No match</span><span class="gcount" id="charCount"></span></div>
+        <div class="rules-note">▲ the answer's value is later/higher · ▼ earlier/lower · Yellow on Debut = within one expansion</div>
+        <div class="gscroll"><div class="gtable">
+          <div class="ghead"><div>Character</div><div>Faction</div><div>Race</div><div>Class</div><div>Gender</div><div>Debut</div></div>
+          <div id="charRows"></div>
+        </div></div>
+      </div>
+    </div>
+    <div class="leaderboard" id="charLb">
+      <h3>🏆 Character of the Day</h3>
+      <div class="lb-toggle"><button class="active" data-board="daily" data-game="char">Today</button><button data-board="all" data-game="char">All-Time</button></div>
+      <div class="date" id="charLbDate"></div>
+      <div class="lb-list" id="charLbList"><div class="lb-empty">Loading…</div></div>
+    </div>
+  </div>
 
-  // drop each provided URL into its card's logo slot; blanks keep the placeholder
-  document.querySelectorAll('.card').forEach(card=>{
-    const name=card.querySelector('h2')?.textContent.trim();
-    const url=LOGOS[name];
-    if(url && url.trim()){
-      const slot=card.querySelector('.logo-slot');
-      if(slot){
-        const img=document.createElement('img');
-        img.src=url.trim(); img.alt=name;
-        img.onerror=function(){ this.remove(); };  // if the URL fails, fall back to placeholder
-        slot.innerHTML='';
-        slot.appendChild(img);
-      }
+  <!-- ===================== WHO'S THAT CHARACTER ===================== -->
+  <div id="view-who" style="display:none">
+    <div class="namegate" id="whoGate"><div class="ng-card"></div></div>
+    <div class="playarea locked" id="whoArea">
+      <div class="quiz-img blurred" id="whoImg"><div class="ph">Character portrait<br>(add image URLs)</div></div>
+      <div class="hint" id="whoHint" style="font-size:17px;margin:14px 0 0">Who is this character?</div>
+      <div class="choices" id="whoChoices"></div>
+      <div class="quiz-result" id="whoResult"></div>
+    </div>
+    <div class="leaderboard" id="whoLb">
+      <h3>🏆 Who's That Character?</h3>
+      <div class="lb-toggle"><button class="active" data-board="daily" data-game="who">Today</button><button data-board="all" data-game="who">All-Time</button></div>
+      <div class="date" id="whoLbDate"></div>
+      <div class="lb-list" id="whoLbList"><div class="lb-empty">Loading…</div></div>
+    </div>
+  </div>
+
+  <!-- ===================== WHICH FACTION (drag/tap sort) ===================== -->
+  <div id="view-faction" style="display:none">
+    <div class="namegate" id="facGate"><div class="ng-card"></div></div>
+    <div class="sortarea locked" id="facArea">
+      <div class="sort-pool" id="facPool"></div>
+      <div class="sort-cols">
+        <div class="sort-col" data-side="Alliance"><h4><span class="col-ic">🦁</span>Alliance</h4><div class="dropzone" id="zone-alliance"></div></div>
+        <div class="sort-col" data-side="Horde"><h4><span class="col-ic">⚔️</span>Horde</h4><div class="dropzone" id="zone-horde"></div></div>
+      </div>
+      <div style="text-align:center;margin-top:18px"><button class="sort-submit" id="facSubmit">Submit Answers</button></div>
+      <div class="sort-result" id="facResult"></div>
+    </div>
+    <div class="leaderboard" id="facLb">
+      <h3>🏆 Which Faction?</h3>
+      <div class="lb-toggle"><button class="active" data-board="daily" data-game="faction">Today</button><button data-board="all" data-game="faction">All-Time</button></div>
+      <div class="date" id="facLbDate"></div>
+      <div class="lb-list" id="facLbList"><div class="lb-empty">Loading…</div></div>
+    </div>
+  </div>
+
+  <!-- ===================== WHAT RACE ===================== -->
+  <div id="view-race" style="display:none">
+    <div class="namegate" id="raceGate"><div class="ng-card"></div></div>
+    <div class="playarea locked" id="raceArea">
+      <div class="quiz-img blurred" id="raceImg"><div class="ph">Character portrait<br>(add image URLs)</div></div>
+      <div class="hint" id="raceHint" style="font-size:17px;margin:14px 0 0">What race is this?</div>
+      <div class="choices" id="raceChoices"></div>
+      <div class="quiz-result" id="raceResult"></div>
+    </div>
+    <div class="leaderboard" id="raceLb">
+      <h3>🏆 What Race?</h3>
+      <div class="lb-toggle"><button class="active" data-board="daily" data-game="race">Today</button><button data-board="all" data-game="race">All-Time</button></div>
+      <div class="date" id="raceLbDate"></div>
+      <div class="lb-list" id="raceLbList"><div class="lb-empty">Loading…</div></div>
+    </div>
+  </div>
+
+  <!-- ===================== WHAT CITY ===================== -->
+  <div id="view-city" style="display:none">
+    <div class="namegate" id="cityGate"><div class="ng-card"></div></div>
+    <div class="playarea locked" id="cityArea">
+      <div class="quiz-img blurred" id="cityImg"><div class="ph">City / zone image<br>(add image URLs)</div></div>
+      <div class="hint" id="cityHint" style="font-size:17px;margin:14px 0 0">What city or zone is this?</div>
+      <div class="choices" id="cityChoices"></div>
+      <div class="quiz-result" id="cityResult"></div>
+    </div>
+    <div class="leaderboard" id="cityLb">
+      <h3>🏆 What City?</h3>
+      <div class="lb-toggle"><button class="active" data-board="daily" data-game="city">Today</button><button data-board="all" data-game="city">All-Time</button></div>
+      <div class="date" id="cityLbDate"></div>
+      <div class="lb-list" id="cityLbList"><div class="lb-empty">Loading…</div></div>
+    </div>
+  </div>
+
+  <div class="footer">BVID WoW · v1.1</div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, query, where }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// Same Firebase project as the Overwatch page — WoW uses its own collections (prefixed wow_)
+const firebaseConfig = {
+  apiKey: "AIzaSyB_jprP9xzNKmTLUw9Jy7ap96RlOenBmps",
+  authDomain: "bvid-test-game.firebaseapp.com",
+  projectId: "bvid-test-game",
+  storageBucket: "bvid-test-game.firebasestorage.app",
+  messagingSenderId: "799530032645",
+  appId: "1:799530032645:web:8da802b4ad8a264283c66c",
+  measurementId: "G-26DMTCH07F"
+};
+let db=null;
+try{ db=getFirestore(initializeApp(firebaseConfig)); }catch(e){ console.warn("Firebase not configured:",e); }
+
+// ============================================================
+//  TEAM ROSTER (shared with the Overwatch page)
+// ============================================================
+const TEAM_NAMES = [
+  "Adam Armstrong","CJ Galarza","Connor Yoho","David Jin","Derek Dincer",
+  "Ellie Russell","Gage Huff","Jake Marada","Jonny Throop","Kori Davis",
+  "Michael Zhang","Mike Furrh","Natasha Manger","Parker Anderson","Sean Hewitt",
+  "Stone Newberry","Thuan Ho","Xiaohu Alcocer","Zarahi Alcocer"
+].sort((a,b)=>a.localeCompare(b));
+const PLACE_POINTS=[20,15,12,9,8,7,6,5,4,3,2];
+function pointsForPlace(p){ return p<PLACE_POINTS.length?PLACE_POINTS[p]:1; }
+
+// ============================================================
+//  CHARACTER ROSTER
+//  faction: Alliance | Horde | Neutral
+//  Verify the lore — these are the famous ones, attributes from
+//  canonical WoW. "debut" = the game/expansion they first appeared,
+//  expressed as a number for the higher/lower clue (see DEBUTS).
+// ============================================================
+const DEBUTS = ["Warcraft I","Warcraft II","Warcraft III","Vanilla","Burning Crusade",
+  "Wrath","Cataclysm","Mists of Pandaria","Warlords","Legion","Battle for Azeroth",
+  "Shadowlands","Dragonflight","The War Within"];
+function debutIdx(name){ return DEBUTS.indexOf(name); }
+
+const ROSTER = [
+  // name, faction, race, class, gender, debut
+  {name:"Thrall",        faction:"Horde",    race:"Orc",        cls:"Shaman",  gender:"Male",   debut:"Warcraft II"},
+  {name:"Jaina Proudmoore",faction:"Alliance",race:"Human",     cls:"Mage",    gender:"Female", debut:"Warcraft III"},
+  {name:"Sylvanas Windrunner",faction:"Horde",race:"Undead",    cls:"Ranger",  gender:"Female", debut:"Warcraft III"},
+  {name:"Arthas Menethil",faction:"Alliance",race:"Human",      cls:"Death Knight",gender:"Male",debut:"Warcraft III"},
+  {name:"Illidan Stormrage",faction:"Neutral",race:"Night Elf", cls:"Demon Hunter",gender:"Male",debut:"Warcraft III"},
+  {name:"Anduin Wrynn",  faction:"Alliance", race:"Human",      cls:"Priest",  gender:"Male",   debut:"Vanilla"},
+  {name:"Varian Wrynn",  faction:"Alliance", race:"Human",      cls:"Warrior", gender:"Male",   debut:"Vanilla"},
+  {name:"Tyrande Whisperwind",faction:"Alliance",race:"Night Elf",cls:"Priest",gender:"Female", debut:"Warcraft III"},
+  {name:"Malfurion Stormrage",faction:"Alliance",race:"Night Elf",cls:"Druid", gender:"Male",   debut:"Warcraft III"},
+  {name:"Grommash Hellscream",faction:"Horde",race:"Orc",       cls:"Warrior", gender:"Male",   debut:"Warcraft III"},
+  {name:"Garrosh Hellscream",faction:"Horde", race:"Orc",       cls:"Warrior", gender:"Male",   debut:"Burning Crusade"},
+  {name:"Vol'jin",       faction:"Horde",    race:"Troll",      cls:"Shadow Hunter",gender:"Male",debut:"Warcraft III"},
+  {name:"Cairne Bloodhoof",faction:"Horde",  race:"Tauren",     cls:"Warrior", gender:"Male",   debut:"Warcraft III"},
+  {name:"Baine Bloodhoof",faction:"Horde",   race:"Tauren",     cls:"Warrior", gender:"Male",   debut:"Vanilla"},
+  {name:"Cenarius",      faction:"Neutral",  race:"Demigod",    cls:"Druid",   gender:"Male",   debut:"Warcraft III"},
+  {name:"Gul'dan",       faction:"Horde",    race:"Orc",        cls:"Warlock", gender:"Male",   debut:"Warcraft I"},
+  {name:"Kael'thas Sunstrider",faction:"Horde",race:"Blood Elf",cls:"Mage",    gender:"Male",   debut:"Warcraft III"},
+  {name:"Lady Vashj",    faction:"Neutral",  race:"Naga",       cls:"Ranger",  gender:"Female", debut:"Warcraft III"},
+  {name:"Kel'Thuzad",    faction:"Neutral",  race:"Undead",     cls:"Lich",    gender:"Male",   debut:"Warcraft III"},
+  {name:"Bolvar Fordragon",faction:"Alliance",race:"Human",     cls:"Paladin", gender:"Male",   debut:"Vanilla"},
+  {name:"Genn Greymane", faction:"Alliance", race:"Worgen",     cls:"Warrior", gender:"Male",   debut:"Cataclysm"},
+  {name:"Khadgar",       faction:"Neutral",  race:"Human",      cls:"Mage",    gender:"Male",   debut:"Warcraft II"},
+  {name:"Medivh",        faction:"Neutral",  race:"Human",      cls:"Mage",    gender:"Male",   debut:"Warcraft I"},
+  {name:"Velen",         faction:"Alliance", race:"Draenei",    cls:"Priest",  gender:"Male",   debut:"Burning Crusade"},
+  {name:"Lor'themar Theron",faction:"Horde", race:"Blood Elf",  cls:"Ranger",  gender:"Male",   debut:"Warcraft III"},
+  {name:"Wrathion",      faction:"Neutral",  race:"Dragon",     cls:"Rogue",   gender:"Male",   debut:"Cataclysm"},
+  {name:"Alexstrasza",   faction:"Neutral",  race:"Dragon",     cls:"Mage",    gender:"Female", debut:"Warcraft II"},
+  {name:"Deathwing",     faction:"Neutral",  race:"Dragon",     cls:"Warrior", gender:"Male",   debut:"Warcraft II"},
+  {name:"Ysera",         faction:"Neutral",  race:"Dragon",     cls:"Druid",   gender:"Female", debut:"Vanilla"},
+  {name:"Bwonsamdi",     faction:"Neutral",  race:"Loa",        cls:"Death",   gender:"Male",   debut:"Battle for Azeroth"},
+  {name:"Magni Bronzebeard",faction:"Alliance",race:"Dwarf",    cls:"Warrior", gender:"Male",   debut:"Vanilla"},
+  {name:"Muradin Bronzebeard",faction:"Alliance",race:"Dwarf",  cls:"Warrior", gender:"Male",   debut:"Warcraft III"},
+  {name:"Gelbin Mekkatorque",faction:"Alliance",race:"Gnome",   cls:"Tinker",  gender:"Male",   debut:"Vanilla"},
+  {name:"Rexxar",        faction:"Horde",    race:"Half-Orc",   cls:"Beastmaster",gender:"Male",debut:"Warcraft III"},
+  {name:"Nathanos Blightcaller",faction:"Horde",race:"Undead",  cls:"Ranger",  gender:"Male",   debut:"Vanilla"},
+  {name:"Turalyon",      faction:"Alliance", race:"Human",      cls:"Paladin", gender:"Male",   debut:"Warcraft II"},
+  {name:"Alleria Windrunner",faction:"Alliance",race:"Void Elf",cls:"Ranger",  gender:"Female", debut:"Warcraft II"},
+  {name:"Tirion Fordring",faction:"Alliance",race:"Human",      cls:"Paladin", gender:"Male",   debut:"Vanilla"},
+  {name:"Maiev Shadowsong",faction:"Neutral",race:"Night Elf",  cls:"Warden",  gender:"Female", debut:"Warcraft III"},
+  {name:"Xal'atath",     faction:"Neutral",  race:"Old God Herald",cls:"Priest",gender:"Female",debut:"Legion"}
+];
+
+// ============================================================
+//  CITIES / ZONES (for What City?)
+//  faction tag is just flavor for wrong-answer plausibility
+// ============================================================
+const CITIES = [
+  "Stormwind City","Orgrimmar","Ironforge","Thunder Bluff","Darnassus","Undercity",
+  "Silvermoon City","The Exodar","Dalaran","Shattrath City","Suramar","Boralus",
+  "Dazar'alor","Valdrakken","Oribos","Bel'ameth","Gilneas City","Booty Bay",
+  "Theramore","Gadgetzan","Zul'Gurub","Tanaris"
+];
+
+// ============================================================
+//  IMAGE URLS — paste your own between the quotes. Blank = placeholder.
+//  Names/cities must match the lists above exactly.
+// ============================================================
+const PORTRAITS = {
+  "Thrall":"", "Jaina Proudmoore":"", "Sylvanas Windrunner":"", "Arthas Menethil":"",
+  "Illidan Stormrage":"", "Anduin Wrynn":"", "Varian Wrynn":"", "Tyrande Whisperwind":"",
+  "Malfurion Stormrage":"", "Grommash Hellscream":"", "Garrosh Hellscream":"", "Vol'jin":"",
+  "Cairne Bloodhoof":"", "Baine Bloodhoof":"", "Cenarius":"", "Gul'dan":"",
+  "Kael'thas Sunstrider":"", "Lady Vashj":"", "Kel'Thuzad":"", "Bolvar Fordragon":"",
+  "Genn Greymane":"", "Khadgar":"", "Medivh":"", "Velen":"", "Lor'themar Theron":"",
+  "Wrathion":"", "Alexstrasza":"", "Deathwing":"", "Ysera":"", "Bwonsamdi":"",
+  "Magni Bronzebeard":"", "Muradin Bronzebeard":"", "Gelbin Mekkatorque":"", "Rexxar":"",
+  "Nathanos Blightcaller":"", "Turalyon":"", "Alleria Windrunner":"", "Tirion Fordring":"",
+  "Maiev Shadowsong":"", "Xal'atath":""
+};
+const CITY_IMAGES = {
+  "Stormwind City":"", "Orgrimmar":"", "Ironforge":"", "Thunder Bluff":"", "Darnassus":"",
+  "Undercity":"", "Silvermoon City":"", "The Exodar":"", "Dalaran":"", "Shattrath City":"",
+  "Suramar":"", "Boralus":"", "Dazar'alor":"", "Valdrakken":"", "Oribos":"", "Bel'ameth":"",
+  "Gilneas City":"", "Booty Bay":"", "Theramore":"", "Gadgetzan":"", "Zul'Gurub":"", "Tanaris":""
+};
+
+function letterAvatar(name, color){
+  const init=(name||'?')[0];
+  const c=color||'#3fb56a';
+  const svg=`<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'>
+    <defs><radialGradient id='g' cx='50%' cy='35%'><stop offset='0%' stop-color='${c}'/><stop offset='100%' stop-color='#11261c'/></radialGradient></defs>
+    <rect width='120' height='120' fill='url(#g)'/>
+    <text x='60' y='74' font-family='Cinzel,serif' font-size='52' font-weight='800' fill='#fff' text-anchor='middle'>${init}</text></svg>`;
+  return 'data:image/svg+xml;utf8,'+encodeURIComponent(svg);
+}
+const FACTION_COLOR={Alliance:'#2f6ad6',Horde:'#b8232a',Neutral:'#caa14a'};
+function charByName(n){ return ROSTER.find(h=>h.name===n); }
+function avatar(name){
+  const url=PORTRAITS[name];
+  if(url && url.trim()) return url.trim();
+  const c=charByName(name); return letterAvatar(name, c?FACTION_COLOR[c.faction]:null);
+}
+function cityImg(name){ const u=CITY_IMAGES[name]; return (u&&u.trim())?u.trim():null; }
+function imgFallback(name){ return `this.onerror=null;this.src='${letterAvatar(name)}'`; }
+
+// ---------- date / daily helpers ----------
+function ptParts(){
+  const fmt=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Los_Angeles',year:'numeric',month:'2-digit',day:'2-digit'});
+  const p={}; fmt.formatToParts(new Date()).forEach(x=>{if(x.type!=='literal')p[x.type]=x.value;});
+  return {y:+p.year,m:+p.month,d:+p.day};
+}
+function ptDayNumber(){ const {y,m,d}=ptParts(); return Math.floor(Date.UTC(y,m-1,d)/86400000); }
+function puzzleNumber(){ return ptDayNumber() - Math.floor(Date.UTC(2026,0,1)/86400000) + 1; }
+function dayKey(){ const {y,m,d}=ptParts(); return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`; }
+function mulberry(seed){ return ()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}; }
+function shuffle(arr,rng){ const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+// deterministic daily pick over a pool, reshuffling each full cycle
+function dailyPick(pool, salt){
+  const n=pool.length, day=ptDayNumber();
+  const cycle=Math.floor(day/n), pos=((day%n)+n)%n;
+  const order=shuffle([...Array(n).keys()], mulberry((2654435761^(cycle*2246822519))^salt));
+  return pool[order[pos]];
+}
+function escapeHtml(s){return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function fmtTime(ts){ try{ return new Intl.DateTimeFormat('en-US',{timeZone:'America/Los_Angeles',hour:'numeric',minute:'2-digit',hour12:true}).format(new Date(ts)); }catch(e){ return ''; } }
+function fmtElapsed(ms){ if(!ms||ms<0) return ''; const s=Math.round(ms/1000); if(s<60) return s+'s'; const m=Math.floor(s/60),r=s%60; return r?`${m}m ${r}s`:`${m}m`; }
+
+function secsToMidnightPT(){
+  const fmt=new Intl.DateTimeFormat('en-GB',{timeZone:'America/Los_Angeles',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+  const p={}; fmt.formatToParts(new Date()).forEach(x=>{if(x.type!=='literal')p[x.type]=x.value;});
+  return 86400-((+p.hour)*3600+(+p.minute)*60+(+p.second));
+}
+function tickCountdown(){
+  const el=document.getElementById('charCountdown'); if(!el) return;
+  let s=secsToMidnightPT(); if(s>=86400)s=0;
+  el.textContent=`NEXT CHARACTER IN ${String(Math.floor(s/3600)).padStart(2,'0')}:${String(Math.floor((s%3600)/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+}
+setInterval(tickCountdown,1000); tickCountdown();
+
+function confetti(){
+  if(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const colors=['#3fb56a','#d9b84a','#2f6ad6','#b8232a','#ffffff'];
+  for(let i=0;i<90;i++){ const d=document.createElement('div'); d.className='confetti';
+    d.style.left=Math.random()*100+'vw'; d.style.background=colors[i%colors.length];
+    d.style.animationDuration=(2.2+Math.random()*1.8)+'s'; d.style.animationDelay=(Math.random()*0.6)+'s';
+    document.body.appendChild(d); setTimeout(()=>d.remove(),4800); }
+}
+
+async function copyText(text,btn,idle){
+  let ok=false;
+  try{ await navigator.clipboard.writeText(text); ok=true; }
+  catch(e){ const ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select(); try{ ok=document.execCommand('copy'); }catch(e2){} ta.remove(); }
+  if(btn){ btn.textContent=ok?'✅ Copied!':'⚠️ Copy failed'; setTimeout(()=>btn.textContent=idle||'📋 Copy result',2000); }
+}
+
+// ---------- name picker (shared) ----------
+function buildNamePicker(container, headline, sub, onPick){
+  container.innerHTML=`
+    <h2>${headline}</h2><p>${sub}</p>
+    <div class="alltime-notice">🏆 Your scores add up on the <b>all-time leaderboard</b> by name. Pick the same name each day so your points stack on one entry.</div>
+    <select class="name-select" aria-label="Choose your name">
+      <option value="" disabled selected>— Select your name —</option>
+      ${TEAM_NAMES.map(n=>`<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('')}
+      <option value="__other__">Other (not on the list)…</option>
+    </select>
+    <div class="other-wrap" style="display:none">
+      <p class="other-note">⚠️ Not on the list? Double-check above first — and type your name <b>exactly the same way every day</b>, or your points will split across spellings.</p>
+      <input type="text" class="other-input" placeholder="Your name" maxlength="20" autocomplete="off">
+    </div>
+    <button class="name-go">Start</button><div class="ng-err"></div>`;
+  const sel=container.querySelector('.name-select'), otherWrap=container.querySelector('.other-wrap'),
+    otherInput=container.querySelector('.other-input'), go=container.querySelector('.name-go'), err=container.querySelector('.ng-err');
+  sel.addEventListener('change',()=>{ otherWrap.style.display=sel.value==='__other__'?'block':'none'; if(sel.value==='__other__')setTimeout(()=>otherInput.focus(),50); err.textContent=''; });
+  function submit(){
+    let name='';
+    if(sel.value==='__other__'){ name=otherInput.value.trim(); if(!name){ err.textContent='Enter a name, or pick yours from the list above.'; return; } }
+    else if(sel.value){ name=sel.value; } else { err.textContent='Please select your name to start.'; return; }
+    onPick(name);
+  }
+  go.onclick=submit; otherInput.addEventListener('keydown',e=>{if(e.key==='Enter')submit();});
+}
+
+// ============================================================
+//  GENERIC SCORE SUBMIT + BOARDS
+//  Each game stores to its own collection (wow_*). Daily lock via localStorage.
+// ============================================================
+async function submitScore(coll, entry, statusEl){
+  if(statusEl) statusEl.textContent='Saving your score…';
+  try{
+    if(!db) throw new Error('Leaderboard backend not configured.');
+    await addDoc(collection(db,coll), entry);
+    if(statusEl) statusEl.textContent='Score saved!';
+  }catch(err){
+    console.error(coll+' save failed:',err);
+    if(statusEl){ statusEl.textContent='Could not save score: '+(err&&err.message?err.message:err); statusEl.style.color='#ffb3b3'; }
+  }
+}
+async function loadDay(coll){
+  if(!db) return [];
+  try{ const snap=await getDocs(query(collection(db,coll), where('day','==',dayKey()))); return snap.docs.map(d=>d.data()); }
+  catch(err){ console.error(err); return []; }
+}
+async function loadAll(coll){
+  if(!db) return [];
+  try{ const snap=await getDocs(collection(db,coll)); return snap.docs.map(d=>d.data()); }
+  catch(err){ console.error(err); return []; }
+}
+
+// rankVal: higher = better place. better tells us how to read it (unused beyond clarity)
+const GAMES = {
+  char:    { coll:'wow_char',    rankVal:e=>-e.turns },
+  who:     { coll:'wow_who',     rankVal:e=>(e.correct?1:0) },
+  faction: { coll:'wow_faction', rankVal:e=>e.score },
+  race:    { coll:'wow_race',    rankVal:e=>(e.correct?1:0) },
+  city:    { coll:'wow_city',    rankVal:e=>(e.correct?1:0) }
+};
+
+function tallyAllTime(entries, rankVal){
+  const byDay={}; entries.forEach(e=>{ if(!e.day) return; (byDay[e.day]=byDay[e.day]||[]).push(e); });
+  const tally={};
+  Object.values(byDay).forEach(list=>{
+    list.sort((a,b)=>rankVal(b)-rankVal(a));
+    let place=0, prev=null;
+    list.forEach((e,i)=>{ const v=rankVal(e); if(prev!==null && v!==prev) place=i; prev=v;
+      const nm=(e.name||'???').slice(0,20); const t=tally[nm]||(tally[nm]={name:nm,points:0,wins:0,days:0});
+      t.points+=pointsForPlace(place); t.days+=1; if(place===0)t.wins+=1; });
+  });
+  return Object.values(tally).sort((a,b)=>b.points-a.points||b.wins-a.wins||a.name.localeCompare(b.name));
+}
+
+const CUR_NAME={char:'',who:'',faction:'',race:'',city:''};
+const MY_ENTRY={char:null,who:null,faction:null,race:null,city:null};
+
+async function renderAllTime(game, listEl, dateEl){
+  if(dateEl) dateEl.textContent='All-Time · points across every day';
+  listEl.innerHTML='<div class="lb-empty">Loading…</div>';
+  const board=tallyAllTime(await loadAll(GAMES[game].coll), GAMES[game].rankVal);
+  if(!board.length){ listEl.innerHTML='<div class="lb-empty">No games recorded yet.</div>'; return; }
+  listEl.innerHTML='';
+  board.forEach((e,i)=>{
+    const rc=i===0?'r1':i===1?'r2':i===2?'r3':''; const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
+    const row=document.createElement('div'); row.className='lb-allrow'+(e.name===CUR_NAME[game]?' me':'');
+    row.innerHTML=`<div class="rank ${rc}">${medal}</div>
+      <div class="nm">${escapeHtml(e.name)}<span class="wins">🏆 ${e.wins} wins · ${e.days} played</span></div>
+      <div class="pts">${e.points} pts</div>`;
+    listEl.appendChild(row);
+  });
+}
+
+// ============================================================
+//  GAME 1 — CHARACTER OF THE DAY (attribute guessing)
+// ============================================================
+let cTarget=null, cGuesses=[], cOver=false, cPlayer='', cStarted=0;
+const CLOSE_DEBUT=1;
+function cCmp(g,t,key){
+  if(key==='debut'){
+    const gi=debutIdx(g.debut), ti=debutIdx(t.debut);
+    if(gi===ti) return {cls:'correct',ar:''};
+    return {cls:Math.abs(gi-ti)<=CLOSE_DEBUT?'close':'wrong', ar: gi<ti?'▲':'▼'};
+  }
+  const map={faction:'faction',race:'race',cls:'cls',gender:'gender'};
+  return g[map[key]]===t[map[key]]?{cls:'correct',ar:''}:{cls:'wrong',ar:''};
+}
+const cInput=document.getElementById('charInput'), cAc=document.getElementById('charAc'),
+  cRows=document.getElementById('charRows'), cRules=document.getElementById('charRules'), cHint=document.getElementById('charHint');
+function cRender(){
+  cRows.innerHTML='';
+  if(cGuesses.length){ cRules.style.display='block'; document.getElementById('charCount').textContent=`· ${cGuesses.length} ${cGuesses.length===1?'guess':'guesses'}`; }
+  [...cGuesses].reverse().forEach(name=>{
+    const g=charByName(name); const row=document.createElement('div'); row.className='grow';
+    let html=`<div class="cell name"><img src="${avatar(g.name)}" onerror="${imgFallback(g.name)}"><span>${g.name}</span></div>`;
+    ['faction','race','cls','gender','debut'].forEach(f=>{ const r=cCmp(g,cTarget,f);
+      const val = f==='debut'?g.debut:g[f];
+      html+=`<div class="cell ${r.cls}">${val}${r.ar?`<span class="ar">${r.ar}</span>`:''}</div>`; });
+    row.innerHTML=html; cRows.appendChild(row);
+  });
+}
+let cAcIdx=-1;
+function cShowOpts(list){ cAc.innerHTML=''; cAcIdx=-1; list.forEach(h=>{ const o=document.createElement('div'); o.className='opt';
+  o.innerHTML=`<img class="pf" src="${avatar(h.name)}" onerror="${imgFallback(h.name)}"><div class="nm">${h.name}</div>`;
+  o.onclick=()=>cGuess(h.name); cAc.appendChild(o); }); }
+cInput.addEventListener('input',()=>{ const v=cInput.value.trim().toLowerCase(); cAc.innerHTML=''; cAcIdx=-1; if(!v) return;
+  const pool=ROSTER.filter(h=>!cGuesses.includes(h.name));
+  const starts=pool.filter(h=>h.name.toLowerCase().startsWith(v));
+  const contains=pool.filter(h=>!starts.includes(h)&&h.name.toLowerCase().includes(v));
+  cShowOpts([...starts,...contains].slice(0,5)); });
+cInput.addEventListener('keydown',e=>{ const opts=[...cAc.children];
+  if(e.key==='ArrowDown'&&opts.length){e.preventDefault();cAcIdx=(cAcIdx+1)%opts.length;opts.forEach((o,i)=>o.classList.toggle('kb',i===cAcIdx));return;}
+  if(e.key==='ArrowUp'&&opts.length){e.preventDefault();cAcIdx=(cAcIdx-1+opts.length)%opts.length;opts.forEach((o,i)=>o.classList.toggle('kb',i===cAcIdx));return;}
+  if(e.key==='Escape'){cAc.innerHTML='';cAcIdx=-1;cClosePanel();return;}
+  if(e.key==='Enter'){ const typed=cInput.value.trim(); const exact=ROSTER.find(h=>h.name.toLowerCase()===typed.toLowerCase());
+    if(exact){cGuess(exact.name);return;} if(cAcIdx>=0&&opts[cAcIdx]){cGuess(opts[cAcIdx].querySelector('.nm').textContent);return;}
+    const first=cAc.querySelector('.opt .nm'); if(first)cGuess(first.textContent); } });
+const cToggle=document.getElementById('charToggle'), cPanel=document.getElementById('charPanel');
+function cBuildPanel(){ cPanel.innerHTML=''; [...ROSTER].sort((a,b)=>a.name.localeCompare(b.name)).forEach(h=>{
+  const o=document.createElement('div'); o.className='opt'+(cGuesses.includes(h.name)?' guessed':'');
+  o.innerHTML=`<img class="pf" src="${avatar(h.name)}" onerror="${imgFallback(h.name)}"><div class="nm">${h.name}</div>`;
+  if(!cGuesses.includes(h.name)) o.onclick=()=>{cGuess(h.name);cClosePanel();}; cPanel.appendChild(o); }); }
+function cOpenPanel(){ if(cOver||!cPlayer)return; cAc.innerHTML=''; cBuildPanel(); cPanel.classList.add('open'); cToggle.classList.add('open'); }
+function cClosePanel(){ cPanel.classList.remove('open'); cToggle.classList.remove('open'); }
+cToggle.onclick=e=>{ e.stopPropagation(); cPanel.classList.contains('open')?cClosePanel():cOpenPanel(); };
+document.addEventListener('click',e=>{ if(!e.target.closest('#charArea .guessbox'))cClosePanel(); });
+function cProgKey(){ return 'wow_char_prog_'+dayKey(); }
+function cSaveProg(){ try{ localStorage.setItem(cProgKey(),JSON.stringify({name:cPlayer,guesses:cGuesses,startedAt:cStarted})); }catch(e){} }
+function cPlayedKey(){ return 'wow_char_played_'+dayKey(); }
+function cGuess(name){
+  if(cOver||!cPlayer)return; const g=ROSTER.find(h=>h.name.toLowerCase()===name.toLowerCase());
+  if(!g){cHint.textContent='No character by that name. Tap ▾ to browse.';return;}
+  if(cGuesses.includes(g.name))return;
+  cGuesses.push(g.name); cInput.value=''; cAc.innerHTML=''; cAcIdx=-1; cHint.style.display='none'; cRender(); cSaveProg();
+  if(g.name===cTarget.name) cWin();
+}
+function cWin(){
+  cOver=true; cInput.disabled=true; cToggle.disabled=true; cClosePanel();
+  try{ localStorage.removeItem(cProgKey()); }catch(e){}
+  document.getElementById('charFace').outerHTML=`<img src="${avatar(cTarget.name)}" onerror="${imgFallback(cTarget.name)}">`;
+  document.getElementById('charLabel').textContent=cTarget.name;
+  document.querySelector('#view-char .mystery').classList.add('solved');
+  try{ localStorage.setItem(cPlayedKey(),JSON.stringify({name:cPlayer,turns:cGuesses.length})); }catch(e){}
+  markDone();
+  const w=document.createElement('div'); w.className='win'; const n=cGuesses.length;
+  w.innerHTML=`<h2>${n===1?'🎯 ACE! First try!':'Solved!'}</h2><p><b>${escapeHtml(cPlayer)}</b> got <b>${cTarget.name}</b> in <b>${n}</b> ${n===1?'guess':'guesses'}.</p>
+    <button class="share-btn" id="cShare">📋 Copy result</button><p class="lb-meta" id="cStatus">Submitting…</p>`;
+  cRules.parentNode.insertBefore(w,cRules.nextSibling);
+  const marks='❌'.repeat(Math.max(0,n-1))+'✅';
+  document.getElementById('cShare').onclick=e=>copyText(`BVID WoW · Character of the Day #${puzzleNumber()}\nSolved in ${n} ${n===1?'guess':'guesses'} ⚔️\n${marks}`,e.currentTarget);
+  w.scrollIntoView({behavior:'smooth',block:'center'}); confetti();
+  MY_ENTRY.char='wc_'+Math.random().toString(36).slice(2,9);
+  submitScore('wow_char',{id:MY_ENTRY.char,name:cPlayer.slice(0,20),turns:n,ts:Date.now(),started:cStarted||null,day:dayKey(),guesses:[...cGuesses]},document.getElementById('cStatus')).then(()=>renderCharDaily());
+}
+async function renderCharDaily(){
+  const listEl=document.getElementById('charLbList'); document.getElementById('charLbDate').textContent=dayKey();
+  let board=await loadDay('wow_char');
+  if(!board.length){ listEl.innerHTML='<div class="lb-empty">No scores yet today — be the first!</div>'; return; }
+  board.sort((a,b)=>a.turns-b.turns||a.ts-b.ts);
+  const reveal=cOver||localStorage.getItem(cPlayedKey())!==null; listEl.innerHTML='';
+  board.forEach((e,i)=>{ const wrap=document.createElement('div'); wrap.className='lb-wrap';
+    const rc=i===0?'r1':i===1?'r2':i===2?'r3':''; const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
+    const meta=`<div class="lb-meta">${e.ts?'Solved '+fmtTime(e.ts):''}${e.started&&e.ts?' · took '+fmtElapsed(e.ts-e.started):''}</div>`;
+    if(reveal){ const gl=(e.guesses||[]).map((gn,gi)=>{const last=gi===e.guesses.length-1;
+        return `<div class="gline"><span class="gnum">${gi+1}</span><span class="gname">${escapeHtml(gn)}</span><span class="gmark ${last?'hit':'miss'}">${last?'✓':'✕'}</span></div>`;}).join('');
+      wrap.innerHTML=`<div class="lb-row${e.id===MY_ENTRY.char?' me':''}"><div class="rank ${rc}">${medal}</div><div class="nm">${escapeHtml(e.name)}</div><div class="turns">${e.turns} ${e.turns===1?'turn':'turns'} <span class="caret">▶</span></div></div><div class="lb-detail">${gl}${meta}</div>`;
+      wrap.querySelector('.lb-row').onclick=()=>wrap.classList.toggle('open');
+    } else { wrap.innerHTML=`<div class="lb-row locked-row"><div class="rank ${rc}">${medal}</div><div class="nm">${escapeHtml(e.name)}</div><div class="turns">${e.turns} ${e.turns===1?'turn':'turns'}</div></div>`; }
+    listEl.appendChild(wrap); });
+}
+function initChar(){
+  cTarget=dailyPick(ROSTER, 101);
+  document.getElementById('puzzleNum').textContent=`PUZZLE #${puzzleNumber()}`;
+  buildNamePicker(document.querySelector('#charGate .ng-card'),"Pick your name to play","Guess today's WoW character from the attribute clues.",
+    n=>{ cPlayer=n; CUR_NAME.char=n; cStarted=Date.now(); document.getElementById('charGate').style.display='none';
+      document.getElementById('charArea').classList.remove('locked'); cInput.disabled=false; cToggle.disabled=false; cSaveProg(); cInput.focus(); });
+  if(localStorage.getItem(cPlayedKey())!==null){
+    let prev={}; try{prev=JSON.parse(localStorage.getItem(cPlayedKey())||'{}');}catch(e){}
+    document.querySelector('#charGate .ng-card').innerHTML=`<h2>Already played today</h2><p><b>${escapeHtml(prev.name||'You')}</b> solved it in <b>${prev.turns}</b> ${prev.turns===1?'guess':'guesses'}.</p><p style="font-size:14px;opacity:.7">A new character unlocks at midnight Pacific Time.</p>`;
+  } else { // resume
+    let p=null; try{p=JSON.parse(localStorage.getItem(cProgKey())||'null');}catch(e){}
+    if(p&&p.name){ cPlayer=p.name; CUR_NAME.char=p.name; cStarted=p.startedAt||Date.now();
+      cGuesses=Array.isArray(p.guesses)?p.guesses.filter(n=>ROSTER.some(h=>h.name===n)):[];
+      document.getElementById('charGate').style.display='none'; document.getElementById('charArea').classList.remove('locked');
+      cInput.disabled=false; cToggle.disabled=false; if(cGuesses.length){cHint.style.display='none';cRender();} }
+  }
+  renderCharDaily();
+}
+
+// ============================================================
+//  MULTIPLE-CHOICE ENGINE (Who's That / What Race / What City)
+//  cfg: { view, imgEl, choicesEl, resultEl, hintEl, coll, salt,
+//         pickAnswer()->{img, correct, options[]}, label }
+// ============================================================
+function buildMC(cfg){
+  let player='', over=false, started=0, q=null;
+  const gate=document.getElementById(cfg.gate), area=document.getElementById(cfg.area),
+    imgWrap=document.getElementById(cfg.img), choicesEl=document.getElementById(cfg.choices),
+    resultEl=document.getElementById(cfg.result), hintEl=document.getElementById(cfg.hint),
+    lbList=document.getElementById(cfg.lbList), lbDate=document.getElementById(cfg.lbDate);
+  const playedKey=()=>cfg.coll+'_played_'+dayKey();
+
+  function showImage(){
+    if(cfg.kind==='city'){ const u=cityImg(q.correct); imgWrap.innerHTML = u?`<img src="${u}">`:`<div class="ph">${escapeHtml(q.correct)}<br><span style="font-size:13px;opacity:.7">(add a city image URL)</span></div>`; }
+    else { const u=PORTRAITS[q.correct]; imgWrap.innerHTML = (u&&u.trim())?`<img src="${u.trim()}">`:`<div class="ph">${escapeHtml(q.correct)}<br><span style="font-size:13px;opacity:.7">(add a portrait URL)</span></div>`; }
+  }
+  function renderChoices(){
+    choicesEl.innerHTML='';
+    q.options.forEach(opt=>{ const b=document.createElement('button'); b.className='choice'; b.textContent=opt;
+      b.onclick=()=>pick(opt,b); choicesEl.appendChild(b); });
+  }
+  function pick(opt,btn){
+    if(over)return; over=true;
+    const right=opt===cfg.answerLabel(q);
+    [...choicesEl.children].forEach(b=>{ b.classList.add('done');
+      if(b.textContent===cfg.answerLabel(q)) b.classList.add('correct');
+      else if(b===btn) b.classList.add('wrong'); else b.classList.add('dim'); });
+    imgWrap.classList.remove('blurred');
+    resultEl.textContent = right?'✅ Correct!':`❌ It was ${cfg.answerLabel(q)}`;
+    resultEl.style.color = right?'#7CFC9B':'#ffb3b3';
+    resultEl.classList.add('show');
+    if(right) confetti();
+    try{ localStorage.setItem(playedKey(),JSON.stringify({name:player,correct:right})); }catch(e){}
+    markDone();
+    MY_ENTRY[cfg.key]='m_'+Math.random().toString(36).slice(2,9);
+    const status=document.createElement('p'); status.className='lb-meta'; status.id=cfg.key+'St'; resultEl.insertAdjacentElement('afterend',status);
+    submitScore(cfg.coll,{id:MY_ENTRY[cfg.key],name:player.slice(0,20),correct:right,ts:Date.now(),started:started||null,day:dayKey(),pick:opt,answer:cfg.answerLabel(q)},status).then(renderDaily);
+  }
+  function renderDaily(){
+    lbDate.textContent=dayKey();
+    loadDay(cfg.coll).then(board=>{
+      if(!board.length){ lbList.innerHTML='<div class="lb-empty">No scores yet today — be the first!</div>'; return; }
+      // correct first, then earliest
+      board.sort((a,b)=>(b.correct?1:0)-(a.correct?1:0)||a.ts-b.ts);
+      lbList.innerHTML='';
+      board.forEach((e,i)=>{ const wrap=document.createElement('div'); wrap.className='lb-wrap';
+        const rc=i===0?'r1':i===1?'r2':i===2?'r3':''; const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
+        const meta=`<div class="lb-meta">${e.ts?'Played '+fmtTime(e.ts):''}${e.started&&e.ts?' · took '+fmtElapsed(e.ts-e.started):''}${e.pick?' · guessed '+escapeHtml(e.pick):''}</div>`;
+        wrap.innerHTML=`<div class="lb-row${e.id===MY_ENTRY[cfg.key]?' me':''}"><div class="rank ${rc}">${medal}</div><div class="nm">${escapeHtml(e.name)}</div><div class="turns">${e.correct?'✅':'❌'} <span class="caret">▶</span></div></div><div class="lb-detail">${meta}</div>`;
+        wrap.querySelector('.lb-row').onclick=()=>wrap.classList.toggle('open'); lbList.appendChild(wrap); });
+    });
+  }
+  function start(n){ player=n; CUR_NAME[cfg.key]=n; started=Date.now(); gate.style.display='none'; area.classList.remove('locked'); }
+  function init(){
+    q=cfg.pickAnswer(); showImage(); renderChoices();
+    buildNamePicker(gate.querySelector('.ng-card'), cfg.headline, cfg.sub, start);
+    if(localStorage.getItem(playedKey())!==null){
+      let prev={}; try{prev=JSON.parse(localStorage.getItem(playedKey())||'{}');}catch(e){}
+      gate.querySelector('.ng-card').innerHTML=`<h2>Already played today</h2><p><b>${escapeHtml(prev.name||'You')}</b> ${prev.correct?'got it right ✅':'missed it ❌'} today.</p><p style="font-size:14px;opacity:.7">A new one unlocks at midnight Pacific Time.</p>`;
+      imgWrap.classList.remove('blurred');
+    }
+    renderDaily();
+  }
+  return { init, renderDaily, lbList, lbDate, key:cfg.key };
+}
+
+// build the day's question for each MC game
+function pickWhoQuestion(){
+  const correct=dailyPick(ROSTER.map(h=>h.name), 202);
+  const ct=charByName(correct);
+  // hard: distractors share faction or race when possible
+  const pool=ROSTER.filter(h=>h.name!==correct);
+  const sameish=pool.filter(h=>h.faction===ct.faction||h.race===ct.race);
+  const rng=mulberry(ptDayNumber()*7+202);
+  const distract=shuffle(sameish.length>=3?sameish:pool,rng).slice(0,3).map(h=>h.name);
+  return { correct, options: shuffle([correct,...distract],rng) };
+}
+function pickRaceQuestion(){
+  const correct=dailyPick(ROSTER.map(h=>h.name), 303);
+  const ct=charByName(correct);
+  const allRaces=[...new Set(ROSTER.map(h=>h.race))].filter(r=>r!==ct.race);
+  const rng=mulberry(ptDayNumber()*7+303);
+  const distract=shuffle(allRaces,rng).slice(0,3);
+  return { correct, race:ct.race, options: shuffle([ct.race,...distract],rng) };
+}
+function pickCityQuestion(){
+  const correct=dailyPick(CITIES, 404);
+  const rng=mulberry(ptDayNumber()*7+404);
+  const distract=shuffle(CITIES.filter(c=>c!==correct),rng).slice(0,3);
+  return { correct, options: shuffle([correct,...distract],rng) };
+}
+
+const whoMC=buildMC({ key:'who', kind:'char', gate:'whoGate', area:'whoArea', img:'whoImg', choices:'whoChoices',
+  result:'whoResult', hint:'whoHint', lbList:'whoLbList', lbDate:'whoLbDate', coll:'wow_who',
+  headline:"Who's That Character?", sub:"Study the portrait, then pick the right name. One shot.",
+  pickAnswer:pickWhoQuestion, answerLabel:q=>q.correct });
+const raceMC=buildMC({ key:'race', kind:'char', gate:'raceGate', area:'raceArea', img:'raceImg', choices:'raceChoices',
+  result:'raceResult', hint:'raceHint', lbList:'raceLbList', lbDate:'raceLbDate', coll:'wow_race',
+  headline:"What Race Is This?", sub:"Look at the character and pick their race. One shot.",
+  pickAnswer:pickRaceQuestion, answerLabel:q=>q.race });
+const cityMC=buildMC({ key:'city', kind:'city', gate:'cityGate', area:'cityArea', img:'cityImg', choices:'cityChoices',
+  result:'cityResult', hint:'cityHint', lbList:'cityLbList', lbDate:'cityLbDate', coll:'wow_city',
+  headline:"What City Is This?", sub:"Identify the city or zone from the image. One shot.",
+  pickAnswer:pickCityQuestion, answerLabel:q=>q.correct });
+
+// ============================================================
+//  GAME 3 — WHICH FACTION? (drag/tap sort, Alliance vs Horde)
+//  Pool of 5 dealt daily; Neutral characters are excluded so every
+//  card has a definitive Alliance/Horde answer.
+// ============================================================
+const FACTION_POOL = ROSTER.filter(h=>h.faction==='Alliance'||h.faction==='Horde').map(h=>h.name);
+let facName='', facDeal=[], facOver=false, facStarted=0;
+function facDealFive(){
+  const rng=mulberry(1013904223^(ptDayNumber()*1597334677));
+  const order=shuffle(FACTION_POOL,rng);
+  // guarantee at least one of each faction
+  const deal=[];
+  ['Alliance','Horde'].forEach(f=>deal.push(order.find(n=>charByName(n).faction===f)));
+  for(const n of order){ if(deal.length>=5)break; if(!deal.includes(n))deal.push(n); }
+  return shuffle(deal,rng);
+}
+function facPlayedKey(){ return 'wow_faction_played_'+dayKey(); }
+function facMakeToken(name){
+  const c=charByName(name); const t=document.createElement('div'); t.className='htoken'; t.draggable=true; t.dataset.name=name;
+  const url=PORTRAITS[name]; const imgHtml = (url&&url.trim())?`<img src="${url.trim()}" onerror="${imgFallback(name)}">`:`<span class="ph">${name[0]}</span>`;
+  t.innerHTML=`${imgHtml}<span>${name}</span><span class="verdict"></span>`;
+  t.addEventListener('dragstart',e=>{t.classList.add('dragging');e.dataTransfer.setData('text/plain',name);});
+  t.addEventListener('dragend',()=>t.classList.remove('dragging'));
+  t.addEventListener('click',()=>{ if(facOver)return;
+    const next=t.parentElement.id==='facPool'?'zone-alliance':t.parentElement.id==='zone-alliance'?'zone-horde':'facPool';
+    document.getElementById(next).appendChild(t); facCount(); });
+  return t;
+}
+function facCount(){ const btn=document.getElementById('facSubmit'); if(facOver)return;
+  const placed=document.querySelectorAll('#zone-alliance .htoken, #zone-horde .htoken').length;
+  btn.disabled=placed<facDeal.length; btn.textContent=placed<facDeal.length?`Place heroes (${placed}/${facDeal.length})`:'Submit Answers'; }
+function facWireZone(el){ el.addEventListener('dragover',e=>{e.preventDefault();el.classList.add('dragover');});
+  el.addEventListener('dragleave',()=>el.classList.remove('dragover'));
+  el.addEventListener('drop',e=>{e.preventDefault();el.classList.remove('dragover');
+    const name=e.dataTransfer.getData('text/plain'); const tok=document.querySelector(`.htoken[data-name="${CSS.escape(name)}"]`);
+    if(tok){el.appendChild(tok);facCount();}}); }
+['facPool','zone-alliance','zone-horde'].forEach(id=>facWireZone(document.getElementById(id)));
+function facPlacedSide(name){ if(document.querySelector(`#zone-alliance .htoken[data-name="${CSS.escape(name)}"]`))return'Alliance';
+  if(document.querySelector(`#zone-horde .htoken[data-name="${CSS.escape(name)}"]`))return'Horde'; return null; }
+function facBuild(){ facDeal=facDealFive(); const pool=document.getElementById('facPool');
+  pool.innerHTML=''; document.getElementById('zone-alliance').innerHTML=''; document.getElementById('zone-horde').innerHTML='';
+  document.getElementById('facResult').textContent=''; facDeal.forEach(n=>pool.appendChild(facMakeToken(n))); facCount(); }
+async function facSubmit(){
+  if(facOver)return; const placed=[...document.querySelectorAll('#zone-alliance .htoken, #zone-horde .htoken')];
+  if(placed.length<facDeal.length)return; facOver=true; document.getElementById('facSubmit').disabled=true;
+  let correct=0, delay=0;
+  ['zone-alliance','zone-horde'].forEach(zid=>{ const side=zid==='zone-alliance'?'Alliance':'Horde';
+    document.querySelectorAll('#'+zid+' .htoken').forEach(tok=>{ const right=charByName(tok.dataset.name).faction===side;
+      tok.style.animationDelay=(delay+=0.12)+'s'; tok.classList.add(right?'correct':'wrong');
+      tok.querySelector('.verdict').textContent=right?'✓':'✕'; tok.draggable=false; if(right)correct++; }); });
+  const res=document.getElementById('facResult'); const perfect=correct===facDeal.length;
+  res.textContent=perfect?`🎉 ${facName}: ${correct}/${facDeal.length} — PERFECT!`:`${facName}: ${correct}/${facDeal.length} correct!`;
+  res.style.color=perfect?'#7CFC9B':'#ffd28a'; res.classList.add('show');
+  if(perfect){ confetti(); document.querySelectorAll('#view-faction .sort-col').forEach(c=>c.classList.add('celebrate')); }
+  try{ localStorage.setItem(facPlayedKey(),JSON.stringify({name:facName,score:correct})); }catch(e){}
+  markDone();
+  const marks=facDeal.map(n=>charByName(n).faction===facPlacedSide(n)?'✅':'❌').join('');
+  const shareBtn=document.createElement('button'); shareBtn.className='sort-share'; shareBtn.textContent='📋 Copy result';
+  shareBtn.onclick=()=>copyText(`BVID WoW · Which Faction? #${puzzleNumber()}\n${correct}/${facDeal.length}${perfect?' — PERFECT! 🛡️':''}\n${marks}`,shareBtn);
+  res.insertAdjacentElement('afterend',shareBtn); res.scrollIntoView({behavior:'smooth',block:'center'});
+  MY_ENTRY.faction='wf_'+Math.random().toString(36).slice(2,9);
+  await submitScore('wow_faction',{id:MY_ENTRY.faction,name:facName.slice(0,20),score:correct,total:facDeal.length,ts:Date.now(),started:facStarted||null,day:dayKey(),picks:facDeal.map(n=>({name:n,side:facPlacedSide(n)}))});
+  renderFacDaily();
+}
+document.getElementById('facSubmit').onclick=facSubmit;
+async function renderFacDaily(){
+  const listEl=document.getElementById('facLbList'); document.getElementById('facLbDate').textContent=dayKey();
+  let board=await loadDay('wow_faction');
+  if(!board.length){ listEl.innerHTML='<div class="lb-empty">No scores yet today — be the first!</div>'; return; }
+  board.sort((a,b)=>b.score-a.score||a.ts-b.ts); listEl.innerHTML='';
+  board.forEach((e,i)=>{ const rc=i===0?'r1':i===1?'r2':i===2?'r3':''; const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
+    const wrap=document.createElement('div'); wrap.className='lb-wrap';
+    const meta=`<div class="lb-meta">${e.ts?'Played '+fmtTime(e.ts):''}${e.started&&e.ts?' · took '+fmtElapsed(e.ts-e.started):''}</div>`;
+    wrap.innerHTML=`<div class="lb-row${e.id===MY_ENTRY.faction?' me':''}"><div class="rank ${rc}">${medal}</div><div class="nm">${escapeHtml(e.name)}</div><div class="turns">${e.score}/${e.total||5} <span class="caret">▶</span></div></div><div class="lb-detail">${meta}</div>`;
+    wrap.querySelector('.lb-row').onclick=()=>wrap.classList.toggle('open'); listEl.appendChild(wrap); });
+}
+function initFaction(){
+  facBuild();
+  buildNamePicker(document.querySelector('#facGate .ng-card'),"Which Faction?","Sort the 5 characters into Alliance or Horde. Drag, or tap to move. Pick your name to play.",
+    n=>{ facName=n; CUR_NAME.faction=n; facStarted=Date.now(); document.getElementById('facGate').style.display='none'; document.getElementById('facArea').classList.remove('locked'); });
+  if(localStorage.getItem(facPlayedKey())!==null){
+    let prev={}; try{prev=JSON.parse(localStorage.getItem(facPlayedKey())||'{}');}catch(e){}
+    document.querySelector('#facGate .ng-card').innerHTML=`<h2>Already played today</h2><p><b>${escapeHtml(prev.name||'You')}</b> sorted today: <b>${prev.score}/5</b>.</p><p style="font-size:14px;opacity:.7">A new set unlocks at midnight Pacific Time.</p>`;
+  }
+  renderFacDaily();
+}
+
+// ============================================================
+//  MODE SWITCHING + LEADERBOARD TOGGLES
+// ============================================================
+const VIEWS={char:'view-char',who:'view-who',faction:'view-faction',race:'view-race',city:'view-city'};
+const built={char:false,who:false,faction:false,race:false,city:false};
+const INITS={char:initChar, who:()=>whoMC.init(), faction:initFaction, race:()=>raceMC.init(), city:()=>cityMC.init()};
+function setMode(m){
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.toggle('active',b.dataset.mode===m));
+  Object.entries(VIEWS).forEach(([k,id])=>document.getElementById(id).style.display=(k===m)?'':'none');
+  if(!built[m]){ built[m]=true; INITS[m](); }
+}
+document.querySelectorAll('.mode-btn').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
+
+const DAILY_RENDER={ char:renderCharDaily, faction:renderFacDaily,
+  who:()=>whoMC.renderDaily(), race:()=>raceMC.renderDaily(), city:()=>cityMC.renderDaily() };
+document.querySelectorAll('.lb-toggle').forEach(tog=>{
+  tog.querySelectorAll('button').forEach(btn=>{
+    btn.onclick=()=>{ const game=btn.dataset.game, board=btn.dataset.board;
+      tog.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b===btn));
+      const map={char:['charLbList','charLbDate'],who:['whoLbList','whoLbDate'],faction:['facLbList','facLbDate'],race:['raceLbList','raceLbDate'],city:['cityLbList','cityLbDate']};
+      const [listId,dateId]=map[game]; const listEl=document.getElementById(listId), dateEl=document.getElementById(dateId);
+      if(board==='all') renderAllTime(game,listEl,dateEl); else DAILY_RENDER[game](); };
+  });
+});
+
+// ✓ badge on mode buttons for dailies already completed today
+function markDone(){
+  const keys={char:'wow_char_played_',who:'wow_who_played_',faction:'wow_faction_played_',race:'wow_race_played_',city:'wow_city_played_'};
+  document.querySelectorAll('.mode-btn').forEach(btn=>{
+    const pre=keys[btn.dataset.mode]; if(!pre) return;
+    let done=false; try{ done=localStorage.getItem(pre+dayKey())!==null; }catch(e){}
+    if(done && !btn.querySelector('.done')){
+      const s=document.createElement('span'); s.className='done'; s.textContent='✓'; btn.appendChild(s);
     }
   });
+}
 
-  // tint the page background to match the hovered IP
-  function lightUp(hex){
-    const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
-    document.documentElement.style.setProperty('--accent-soft',`rgba(${r},${g},${b},0.20)`);
-  }
-  function resetBg(){
-    document.documentElement.style.setProperty('--accent-soft','rgba(93,107,154,0.18)');
-  }
+// boot the default view
+setMode('char');
+markDone();
 </script>
 </body>
 </html>
