@@ -73,6 +73,8 @@
   .mode-btn .ic{font-size:24px}
   .mode-btn.active{outline:3px solid var(--accent);transform:translateY(-2px)}
   .mode-btn:not(.active){opacity:.78}
+  .mode-btn:hover:not(.active){opacity:.94;transform:translateY(-1px)}
+  .mode-btn .done{color:var(--correct);font-weight:800;font-size:17px;margin-left:2px}
 
   /* mystery card */
   .mystery{
@@ -999,6 +1001,7 @@ async function submitScore(){
     if(status){status.textContent='Could not save score — leaderboard backend not set up yet.';status.style.color='#ffb3b3';}
   }
   markPlayed();   // lock this device for the rest of the PT day
+  markDone();
   renderBoard();
 }
 
@@ -1327,6 +1330,7 @@ async function submitSort(){
   res.insertAdjacentElement('afterend',shareBtn);
   res.scrollIntoView({behavior:'smooth',block:'center'});
   markSorted(correct);
+  markDone();
   await submitSortScore(correct);
   renderSortBoard();
 }
@@ -1532,6 +1536,7 @@ function ultWin(){
   w.scrollIntoView({behavior:'smooth',block:'center'});
   confetti();
   markUlted();
+  markDone();
   submitUltScore();
 }
 
@@ -1789,6 +1794,18 @@ function setMode(m){
 modeDailyBtn.onclick=()=>setMode('daily');
 modeSortBtn.onclick=()=>setMode('sort');
 modeUltBtn.onclick=()=>setMode('ult');
+
+// ✓ badge on mode buttons for dailies already completed today
+function markDone(){
+  const map=[[modeDailyBtn,playedKey()],[modeSortBtn,sortPlayedKey()],[modeUltBtn,ultPlayedKey()]];
+  map.forEach(([btn,key])=>{
+    let done=false; try{ done=localStorage.getItem(key)!==null; }catch(e){}
+    if(done && !btn.querySelector('.done')){
+      const s=document.createElement('span'); s.className='done'; s.textContent='✓'; btn.appendChild(s);
+    }
+  });
+}
+markDone();
 
 target=pickTarget();
 document.getElementById('puzzleNum').textContent=`PUZZLE #${puzzleNumber()}`;
