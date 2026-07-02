@@ -216,6 +216,13 @@
   .lb-row .rank.r1{color:#d4a017}.lb-row .rank.r2{color:#9aa0b8}.lb-row .rank.r3{color:#b06a3a}
   .lb-row .turns{font-family:'Orbitron';font-size:14px;opacity:.8}
   .lb-empty{text-align:center;opacity:.6;padding:14px}
+  /* podium treatment for top 3 + pulse to find yourself */
+  .lb-row:has(.rank.r1),.lb-allrow:has(.rank.r1){background:rgba(212,160,23,.16)}
+  .lb-row:has(.rank.r2),.lb-allrow:has(.rank.r2){background:rgba(154,160,184,.16)}
+  .lb-row:has(.rank.r3),.lb-allrow:has(.rank.r3){background:rgba(176,106,58,.16)}
+  .lb-row:has(.rank.r1) .nm,.lb-allrow:has(.rank.r1) .nm{font-weight:800}
+  .lb-row.me,.lb-allrow.me{animation:mepulse 1.2s ease-out 1}
+  @keyframes mepulse{0%{transform:scale(1)}30%{transform:scale(1.025)}100%{transform:scale(1)}}
 
   /* name gate */
   .namegate{max-width:480px;margin:0 auto 4px}
@@ -526,7 +533,7 @@
     </div>
   </div>
 
-  <div class="footer">BVID OW · v1.3</div>
+  <div class="footer">BVID OW · v1.4</div>
 </div>
 
 <script type="module">
@@ -969,7 +976,7 @@ function win(){
   document.querySelector('.mystery').classList.add('solved');
   const s=updateStats();
   const w=document.createElement('div'); w.className='win';
-  w.innerHTML=`<h2>Solved!</h2>
+  w.innerHTML=`<h2>${guesses.length===1?'🎯 ACE! First try!':'Solved!'}</h2>
     <p><b>${escapeHtml(playerName)}</b> got <b>${target.name}</b> in <b>${guesses.length}</b> ${guesses.length===1?'guess':'guesses'}.</p>
     <div class="stats">
       <div><b>${s.streak}</b>🔥 streak</div>
@@ -1525,7 +1532,7 @@ function ultWin(){
   document.getElementById('ultSub').textContent='SOLVED!';
   const w=document.createElement('div'); w.className='win';
   const n=ultGuessList.length;
-  w.innerHTML=`<h2>Solved!</h2>
+  w.innerHTML=`<h2>${n===1?'🎯 ACE! First try!':'Solved!'}</h2>
     <p><b>${escapeHtml(ultPlayer)}</b> named <b>${ultTarget.name}</b> in <b>${n}</b> ${n===1?'guess':'guesses'}.</p>
     <button class="share-btn" id="ultShareBtn">📋 Copy result</button>
     <p class="lb-note" id="ultStatus">Submitting your score…</p>`;
