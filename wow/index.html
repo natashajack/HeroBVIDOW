@@ -65,6 +65,9 @@
   .mode-btn .ic{font-size:20px}
   .mode-btn.active{outline:3px solid var(--accent);transform:translateY(-2px)}
   .mode-btn:not(.active){opacity:.74}
+  .mode-btn:hover:not(.active){opacity:.92;transform:translateY(-1px)}
+  .mode-btn .done{color:var(--correct);font-weight:800;font-size:16px;margin-left:2px}
+  .choice.done{cursor:default}
 
   /* name picker */
   .namegate{max-width:480px;margin:0 auto 4px}
@@ -763,6 +766,7 @@ function cWin(){
   document.getElementById('charLabel').textContent=cTarget.name;
   document.querySelector('#view-char .mystery').classList.add('solved');
   try{ localStorage.setItem(cPlayedKey(),JSON.stringify({name:cPlayer,turns:cGuesses.length})); }catch(e){}
+  markDone();
   const w=document.createElement('div'); w.className='win'; const n=cGuesses.length;
   w.innerHTML=`<h2>Solved!</h2><p><b>${escapeHtml(cPlayer)}</b> got <b>${cTarget.name}</b> in <b>${n}</b> ${n===1?'guess':'guesses'}.</p>
     <button class="share-btn" id="cShare">📋 Copy result</button><p class="lb-meta" id="cStatus">Submitting…</p>`;
@@ -842,6 +846,7 @@ function buildMC(cfg){
     resultEl.classList.add('show');
     if(right) confetti();
     try{ localStorage.setItem(playedKey(),JSON.stringify({name:player,correct:right})); }catch(e){}
+    markDone();
     MY_ENTRY[cfg.key]='m_'+Math.random().toString(36).slice(2,9);
     const status=document.createElement('p'); status.className='lb-meta'; status.id=cfg.key+'St'; resultEl.insertAdjacentElement('afterend',status);
     submitScore(cfg.coll,{id:MY_ENTRY[cfg.key],name:player.slice(0,20),correct:right,ts:Date.now(),started:started||null,day:dayKey(),pick:opt,answer:cfg.answerLabel(q)},status).then(renderDaily);
@@ -968,6 +973,7 @@ async function facSubmit(){
   res.style.color=perfect?'#7CFC9B':'#ffd28a'; res.classList.add('show');
   if(perfect){ confetti(); document.querySelectorAll('#view-faction .sort-col').forEach(c=>c.classList.add('celebrate')); }
   try{ localStorage.setItem(facPlayedKey(),JSON.stringify({name:facName,score:correct})); }catch(e){}
+  markDone();
   const marks=facDeal.map(n=>charByName(n).faction===facPlacedSide(n)?'✅':'❌').join('');
   const shareBtn=document.createElement('button'); shareBtn.className='sort-share'; shareBtn.textContent='📋 Copy result';
   shareBtn.onclick=()=>copyText(`BVID WoW · Which Faction? #${puzzleNumber()}\n${correct}/${facDeal.length}${perfect?' — PERFECT! 🛡️':''}\n${marks}`,shareBtn);
@@ -1024,8 +1030,21 @@ document.querySelectorAll('.lb-toggle').forEach(tog=>{
   });
 });
 
+// ✓ badge on mode buttons for dailies already completed today
+function markDone(){
+  const keys={char:'wow_char_played_',who:'wow_who_played_',faction:'wow_faction_played_',race:'wow_race_played_',city:'wow_city_played_'};
+  document.querySelectorAll('.mode-btn').forEach(btn=>{
+    const pre=keys[btn.dataset.mode]; if(!pre) return;
+    let done=false; try{ done=localStorage.getItem(pre+dayKey())!==null; }catch(e){}
+    if(done && !btn.querySelector('.done')){
+      const s=document.createElement('span'); s.className='done'; s.textContent='✓'; btn.appendChild(s);
+    }
+  });
+}
+
 // boot the default view
 setMode('char');
+markDone();
 </script>
 </body>
 </html>
